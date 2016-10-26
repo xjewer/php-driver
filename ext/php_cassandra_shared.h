@@ -501,8 +501,6 @@ int php_cassandra_mshutdown(SHUTDOWN_FUNC_ARGS);
 int php_cassandra_rinit(INIT_FUNC_ARGS);
 int php_cassandra_rshutdown(SHUTDOWN_FUNC_ARGS);
 
-ZEND_EXTERN_MODULE_GLOBALS(cassandra)
-
 ZEND_BEGIN_MODULE_GLOBALS(cassandra)
   CassUuidGen          *uuid_gen;
   pid_t                 uuid_gen_pid;
@@ -529,6 +527,8 @@ ZEND_BEGIN_MODULE_GLOBALS(cassandra)
   php5to7_zval          type_smallint;
   php5to7_zval          type_tinyint;
 ZEND_END_MODULE_GLOBALS(cassandra)
+
+ZEND_EXTERN_MODULE_GLOBALS(cassandra)
 
 #ifdef ZTS
 #  define CASSANDRA_G(v) TSRMG(cassandra_globals_id, zend_cassandra_globals *, v)
