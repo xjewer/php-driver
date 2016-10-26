@@ -156,6 +156,7 @@ if test "$PHP_CASSANDRA" != "no"; then
 
   PHP_NEW_EXTENSION(cassandra,
     php_cassandra.c \
+    php_cassandra_shared.c \
     $CASSANDRA_CLASSES \
     $CASSANDRA_EXCEPTIONS \
     $CASSANDRA_RETRY_POLICIES \
