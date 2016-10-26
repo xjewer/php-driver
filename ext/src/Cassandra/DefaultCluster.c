@@ -227,7 +227,7 @@ php_cassandra_default_cluster_compare(zval *obj1, zval *obj2 TSRMLS_DC)
 static void
 php_cassandra_default_cluster_free(php5to7_zend_object_free *object TSRMLS_DC)
 {
-  cassandra_cluster *self = PHP5TO7_ZEND_OBJECT_GET(cluster, object);
+  cassandra_cluster *self = PHP5TO7_ZEND_OBJECT_GET(cassandra_cluster, object);
 
   if (self->persist) {
     efree(self->hash_key);
@@ -245,7 +245,7 @@ static php5to7_zend_object
 php_cassandra_default_cluster_new(zend_class_entry *ce TSRMLS_DC)
 {
   cassandra_cluster *self =
-      PHP5TO7_ZEND_OBJECT_ECALLOC(cluster, ce);
+      PHP5TO7_ZEND_OBJECT_ECALLOC(cassandra_cluster, ce);
 
   self->cluster             = NULL;
   self->default_consistency = PHP_CASSANDRA_DEFAULT_CONSISTENCY;
@@ -255,7 +255,7 @@ php_cassandra_default_cluster_new(zend_class_entry *ce TSRMLS_DC)
 
   PHP5TO7_ZVAL_UNDEF(self->default_timeout);
 
-  PHP5TO7_ZEND_OBJECT_INIT_EX(cluster, default_cluster, self, ce);
+  PHP5TO7_ZEND_OBJECT_INIT_EX(cassandra_cluster, cassandra_default_cluster, self, ce);
 }
 
 void cassandra_define_DefaultCluster(TSRMLS_D)

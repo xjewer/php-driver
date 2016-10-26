@@ -261,7 +261,7 @@ php_cassandra_default_index_compare(zval *obj1, zval *obj2 TSRMLS_DC)
 static void
 php_cassandra_default_index_free(php5to7_zend_object_free *object TSRMLS_DC)
 {
-  cassandra_index *self = PHP5TO7_ZEND_OBJECT_GET(index, object);
+  cassandra_index *self = PHP5TO7_ZEND_OBJECT_GET(cassandra_index, object);
 
   PHP5TO7_ZVAL_MAYBE_DESTROY(self->name);
   PHP5TO7_ZVAL_MAYBE_DESTROY(self->kind);
@@ -282,7 +282,7 @@ static php5to7_zend_object
 php_cassandra_default_index_new(zend_class_entry *ce TSRMLS_DC)
 {
   cassandra_index *self =
-      PHP5TO7_ZEND_OBJECT_ECALLOC(index, ce);
+      PHP5TO7_ZEND_OBJECT_ECALLOC(cassandra_index, ce);
 
   PHP5TO7_ZVAL_UNDEF(self->name);
   PHP5TO7_ZVAL_UNDEF(self->kind);
@@ -292,7 +292,7 @@ php_cassandra_default_index_new(zend_class_entry *ce TSRMLS_DC)
   self->schema = NULL;
   self->meta = NULL;
 
-  PHP5TO7_ZEND_OBJECT_INIT_EX(index, default_index, self, ce);
+  PHP5TO7_ZEND_OBJECT_INIT_EX(cassandra_index, cassandra_default_index, self, ce);
 }
 
 void cassandra_define_DefaultIndex(TSRMLS_D)

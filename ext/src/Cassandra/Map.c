@@ -552,7 +552,7 @@ php_cassandra_map_hash_value(zval *obj TSRMLS_DC)
 static void
 php_cassandra_map_free(php5to7_zend_object_free *object TSRMLS_DC)
 {
-  cassandra_map *self = PHP5TO7_ZEND_OBJECT_GET(map, object);
+  cassandra_map *self = PHP5TO7_ZEND_OBJECT_GET(cassandra_map, object);
   cassandra_map_entry *curr, *temp;
 
   HASH_ITER(hh, self->entries, curr, temp) {
@@ -572,13 +572,13 @@ static php5to7_zend_object
 php_cassandra_map_new(zend_class_entry *ce TSRMLS_DC)
 {
   cassandra_map *self =
-      PHP5TO7_ZEND_OBJECT_ECALLOC(map, ce);
+      PHP5TO7_ZEND_OBJECT_ECALLOC(cassandra_map, ce);
 
   self->entries = self->iter_curr = self->iter_temp = NULL;
   self->dirty = 1;
   PHP5TO7_ZVAL_UNDEF(self->type);
 
-  PHP5TO7_ZEND_OBJECT_INIT(map, self, ce);
+  PHP5TO7_ZEND_OBJECT_INIT(cassandra_map, self, ce);
 }
 
 void cassandra_define_Map(TSRMLS_D)

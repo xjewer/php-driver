@@ -411,7 +411,7 @@ static void
 php_cassandra_collection_free(php5to7_zend_object_free *object TSRMLS_DC)
 {
   cassandra_collection *self =
-      PHP5TO7_ZEND_OBJECT_GET(collection, object);
+      PHP5TO7_ZEND_OBJECT_GET(cassandra_collection, object);
 
   zend_hash_destroy(&self->values);
   PHP5TO7_ZVAL_MAYBE_DESTROY(self->type);
@@ -424,13 +424,13 @@ static php5to7_zend_object
 php_cassandra_collection_new(zend_class_entry *ce TSRMLS_DC)
 {
   cassandra_collection *self =
-      PHP5TO7_ZEND_OBJECT_ECALLOC(collection, ce);
+      PHP5TO7_ZEND_OBJECT_ECALLOC(cassandra_collection, ce);
 
   zend_hash_init(&self->values, 0, NULL, ZVAL_PTR_DTOR, 0);
   self->dirty = 1;
   PHP5TO7_ZVAL_UNDEF(self->type);
 
-  PHP5TO7_ZEND_OBJECT_INIT(collection, self, ce);
+  PHP5TO7_ZEND_OBJECT_INIT(cassandra_collection, self, ce);
 }
 
 void cassandra_define_Collection(TSRMLS_D)

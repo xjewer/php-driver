@@ -28,7 +28,7 @@ static zend_object_handlers cassandra_timestamp_gen_monotonic_handlers;
 static void
 php_cassandra_timestamp_gen_monotonic_free(php5to7_zend_object_free *object TSRMLS_DC)
 {
-  cassandra_timestamp_gen *self = PHP5TO7_ZEND_OBJECT_GET(timestamp_gen, object);
+  cassandra_timestamp_gen *self = PHP5TO7_ZEND_OBJECT_GET(cassandra_timestamp_gen, object);
 
   cass_timestamp_gen_free(self->gen);
 
@@ -39,11 +39,11 @@ php_cassandra_timestamp_gen_monotonic_free(php5to7_zend_object_free *object TSRM
 static php5to7_zend_object
 php_cassandra_timestamp_gen_monotonic_new(zend_class_entry *ce TSRMLS_DC)
 {
-  cassandra_timestamp_gen *self = PHP5TO7_ZEND_OBJECT_ECALLOC(timestamp_gen, ce);
+  cassandra_timestamp_gen *self = PHP5TO7_ZEND_OBJECT_ECALLOC(cassandra_timestamp_gen, ce);
 
   self->gen = cass_timestamp_gen_monotonic_new();
 
-  PHP5TO7_ZEND_OBJECT_INIT_EX(timestamp_gen, timestamp_gen_monotonic, self, ce);
+  PHP5TO7_ZEND_OBJECT_INIT_EX(cassandra_timestamp_gen, cassandra_timestamp_gen_monotonic, self, ce);
 }
 
 void cassandra_define_TimestampGeneratorMonotonic(TSRMLS_D)

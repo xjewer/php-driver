@@ -463,7 +463,7 @@ php_cassandra_bigint_cast(zval *object, zval *retval, int type TSRMLS_DC)
 static void
 php_cassandra_bigint_free(php5to7_zend_object_free *object TSRMLS_DC)
 {
-  cassandra_numeric *self = PHP5TO7_ZEND_OBJECT_GET(numeric, object);
+  cassandra_numeric *self = PHP5TO7_ZEND_OBJECT_GET(cassandra_numeric, object);
 
   zend_object_std_dtor(&self->zval TSRMLS_CC);
   PHP5TO7_MAYBE_EFREE(self);
@@ -473,11 +473,11 @@ static php5to7_zend_object
 php_cassandra_bigint_new(zend_class_entry *ce TSRMLS_DC)
 {
   cassandra_numeric *self =
-      PHP5TO7_ZEND_OBJECT_ECALLOC(numeric, ce);
+      PHP5TO7_ZEND_OBJECT_ECALLOC(cassandra_numeric, ce);
 
   self->type = CASSANDRA_BIGINT;
 
-  PHP5TO7_ZEND_OBJECT_INIT_EX(numeric, bigint, self, ce);
+  PHP5TO7_ZEND_OBJECT_INIT_EX(cassandra_numeric, cassandra_bigint, self, ce);
 }
 
 void cassandra_define_Bigint(TSRMLS_D)

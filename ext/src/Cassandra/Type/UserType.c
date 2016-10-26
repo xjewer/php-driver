@@ -299,7 +299,7 @@ php_cassandra_type_user_type_compare(zval *obj1, zval *obj2 TSRMLS_DC)
 static void
 php_cassandra_type_user_type_free(php5to7_zend_object_free *object TSRMLS_DC)
 {
-  cassandra_type *self = PHP5TO7_ZEND_OBJECT_GET(type, object);
+  cassandra_type *self = PHP5TO7_ZEND_OBJECT_GET(cassandra_type, object);
 
   if (self->data_type) cass_data_type_free(self->data_type);
   if (self->keyspace) efree(self->keyspace);
@@ -313,14 +313,14 @@ php_cassandra_type_user_type_free(php5to7_zend_object_free *object TSRMLS_DC)
 static php5to7_zend_object
 php_cassandra_type_user_type_new(zend_class_entry *ce TSRMLS_DC)
 {
-  cassandra_type *self = PHP5TO7_ZEND_OBJECT_ECALLOC(type, ce);
+  cassandra_type *self = PHP5TO7_ZEND_OBJECT_ECALLOC(cassandra_type, ce);
 
   self->type = CASS_VALUE_TYPE_UDT;
   self->data_type = NULL;
   self->keyspace = self->type_name = NULL;
   zend_hash_init(&self->types, 0, NULL, ZVAL_PTR_DTOR, 0);
 
-  PHP5TO7_ZEND_OBJECT_INIT_EX(type, type_user_type, self, ce);
+  PHP5TO7_ZEND_OBJECT_INIT_EX(cassandra_type, cassandra_type_user_type, self, ce);
 }
 
 void cassandra_define_TypeUserType(TSRMLS_D)

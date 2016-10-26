@@ -262,7 +262,7 @@ php_cassandra_time_hash_value(zval *obj TSRMLS_DC)
 static void
 php_cassandra_time_free(php5to7_zend_object_free *object TSRMLS_DC)
 {
-  cassandra_time *self = PHP5TO7_ZEND_OBJECT_GET(time, object);
+  cassandra_time *self = PHP5TO7_ZEND_OBJECT_GET(cassandra_time, object);
 
   zend_object_std_dtor(&self->zval TSRMLS_CC);
   PHP5TO7_MAYBE_EFREE(self);
@@ -272,11 +272,11 @@ static php5to7_zend_object
 php_cassandra_time_new(zend_class_entry *ce TSRMLS_DC)
 {
   cassandra_time *self =
-      PHP5TO7_ZEND_OBJECT_ECALLOC(time, ce);
+      PHP5TO7_ZEND_OBJECT_ECALLOC(cassandra_time, ce);
 
   self->time = 0;
 
-  PHP5TO7_ZEND_OBJECT_INIT(time, self, ce);
+  PHP5TO7_ZEND_OBJECT_INIT(cassandra_time, self, ce);
 }
 
 void cassandra_define_Time(TSRMLS_D)

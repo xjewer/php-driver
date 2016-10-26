@@ -51,7 +51,7 @@ php_cassandra_prepared_statement_compare(zval *obj1, zval *obj2 TSRMLS_DC)
 static void
 php_cassandra_prepared_statement_free(php5to7_zend_object_free *object TSRMLS_DC)
 {
-  cassandra_statement *self = PHP5TO7_ZEND_OBJECT_GET(statement, object);
+  cassandra_statement *self = PHP5TO7_ZEND_OBJECT_GET(cassandra_statement, object);
 
   if (self->prepared)
     cass_prepared_free(self->prepared);
@@ -64,12 +64,12 @@ static php5to7_zend_object
 php_cassandra_prepared_statement_new(zend_class_entry *ce TSRMLS_DC)
 {
   cassandra_statement *self =
-      PHP5TO7_ZEND_OBJECT_ECALLOC(statement, ce);
+      PHP5TO7_ZEND_OBJECT_ECALLOC(cassandra_statement, ce);
 
   self->type = CASSANDRA_PREPARED_STATEMENT;
   self->prepared = NULL;
 
-  PHP5TO7_ZEND_OBJECT_INIT_EX(statement, prepared_statement, self, ce);
+  PHP5TO7_ZEND_OBJECT_INIT_EX(cassandra_statement, cassandra_prepared_statement, self, ce);
 }
 
 void cassandra_define_PreparedStatement(TSRMLS_D)

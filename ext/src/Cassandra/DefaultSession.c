@@ -912,7 +912,7 @@ php_cassandra_default_session_compare(zval *obj1, zval *obj2 TSRMLS_DC)
 static void
 php_cassandra_default_session_free(php5to7_zend_object_free *object TSRMLS_DC)
 {
-  cassandra_session *self = PHP5TO7_ZEND_OBJECT_GET(session, object);
+  cassandra_session *self = PHP5TO7_ZEND_OBJECT_GET(cassandra_session, object);
 
   if (!self->persist && self->session) {
     cass_session_free(self->session);
@@ -926,7 +926,7 @@ static php5to7_zend_object
 php_cassandra_default_session_new(zend_class_entry *ce TSRMLS_DC)
 {
   cassandra_session *self =
-      PHP5TO7_ZEND_OBJECT_ECALLOC(session, ce);
+      PHP5TO7_ZEND_OBJECT_ECALLOC(cassandra_session, ce);
 
   self->session             = NULL;
   self->persist             = 0;
@@ -934,7 +934,7 @@ php_cassandra_default_session_new(zend_class_entry *ce TSRMLS_DC)
   self->default_page_size   = 5000;
   PHP5TO7_ZVAL_UNDEF(self->default_timeout);
 
-  PHP5TO7_ZEND_OBJECT_INIT_EX(session, default_session, self, ce);
+  PHP5TO7_ZEND_OBJECT_INIT_EX(cassandra_session, cassandra_default_session, self, ce);
 }
 
 void cassandra_define_DefaultSession(TSRMLS_D)

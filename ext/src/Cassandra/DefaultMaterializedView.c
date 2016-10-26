@@ -604,7 +604,7 @@ php_cassandra_default_materialized_view_compare(zval *obj1, zval *obj2 TSRMLS_DC
 static void
 php_cassandra_default_materialized_view_free(php5to7_zend_object_free *object TSRMLS_DC)
 {
-  cassandra_materialized_view *self = PHP5TO7_ZEND_OBJECT_GET(materialized_view, object);
+  cassandra_materialized_view *self = PHP5TO7_ZEND_OBJECT_GET(cassandra_materialized_view, object);
 
   PHP5TO7_ZVAL_MAYBE_DESTROY(self->name);
   PHP5TO7_ZVAL_MAYBE_DESTROY(self->options);
@@ -628,7 +628,7 @@ static php5to7_zend_object
 php_cassandra_default_materialized_view_new(zend_class_entry *ce TSRMLS_DC)
 {
   cassandra_materialized_view *self =
-      PHP5TO7_ZEND_OBJECT_ECALLOC(materialized_view, ce);
+      PHP5TO7_ZEND_OBJECT_ECALLOC(cassandra_materialized_view, ce);
 
   PHP5TO7_ZVAL_UNDEF(self->name);
   PHP5TO7_ZVAL_UNDEF(self->options);
@@ -641,7 +641,7 @@ php_cassandra_default_materialized_view_new(zend_class_entry *ce TSRMLS_DC)
   self->meta   = NULL;
   self->schema = NULL;
 
-  PHP5TO7_ZEND_OBJECT_INIT_EX(materialized_view, default_materialized_view, self, ce);
+  PHP5TO7_ZEND_OBJECT_INIT_EX(cassandra_materialized_view, cassandra_default_materialized_view, self, ce);
 }
 
 void cassandra_define_DefaultMaterializedView(TSRMLS_D)

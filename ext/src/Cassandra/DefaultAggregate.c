@@ -240,7 +240,7 @@ php_cassandra_default_aggregate_compare(zval *obj1, zval *obj2 TSRMLS_DC)
 static void
 php_cassandra_default_aggregate_free(php5to7_zend_object_free *object TSRMLS_DC)
 {
-  cassandra_aggregate *self = PHP5TO7_ZEND_OBJECT_GET(aggregate, object);
+  cassandra_aggregate *self = PHP5TO7_ZEND_OBJECT_GET(cassandra_aggregate, object);
 
   PHP5TO7_ZVAL_MAYBE_DESTROY(self->simple_name);
   PHP5TO7_ZVAL_MAYBE_DESTROY(self->argument_types);
@@ -265,7 +265,7 @@ static php5to7_zend_object
 php_cassandra_default_aggregate_new(zend_class_entry *ce TSRMLS_DC)
 {
   cassandra_aggregate *self =
-      PHP5TO7_ZEND_OBJECT_ECALLOC(aggregate, ce);
+      PHP5TO7_ZEND_OBJECT_ECALLOC(cassandra_aggregate, ce);
 
   PHP5TO7_ZVAL_UNDEF(self->simple_name);
   PHP5TO7_ZVAL_UNDEF(self->argument_types);
@@ -279,7 +279,7 @@ php_cassandra_default_aggregate_new(zend_class_entry *ce TSRMLS_DC)
   self->schema = NULL;
   self->meta = NULL;
 
-  PHP5TO7_ZEND_OBJECT_INIT_EX(aggregate, default_aggregate, self, ce);
+  PHP5TO7_ZEND_OBJECT_INIT_EX(cassandra_aggregate, cassandra_default_aggregate, self, ce);
 }
 
 void cassandra_define_DefaultAggregate(TSRMLS_D)

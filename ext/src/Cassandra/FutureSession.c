@@ -114,7 +114,7 @@ static void
 php_cassandra_future_session_free(php5to7_zend_object_free *object TSRMLS_DC)
 {
   cassandra_future_session *self =
-      PHP5TO7_ZEND_OBJECT_GET(future_session, object);
+      PHP5TO7_ZEND_OBJECT_GET(cassandra_future_session, object);
 
   if (self->persist) {
     efree(self->hash_key);
@@ -138,7 +138,7 @@ static php5to7_zend_object
 php_cassandra_future_session_new(zend_class_entry *ce TSRMLS_DC)
 {
   cassandra_future_session *self
-      = PHP5TO7_ZEND_OBJECT_ECALLOC(future_session, ce);
+      = PHP5TO7_ZEND_OBJECT_ECALLOC(cassandra_future_session, ce);
 
   self->session           = NULL;
   self->future            = NULL;
@@ -146,7 +146,7 @@ php_cassandra_future_session_new(zend_class_entry *ce TSRMLS_DC)
   self->hash_key          = NULL;
   self->persist           = 0;
 
-  PHP5TO7_ZEND_OBJECT_INIT(future_session, self, ce);
+  PHP5TO7_ZEND_OBJECT_INIT(cassandra_future_session, self, ce);
 }
 
 void cassandra_define_FutureSession(TSRMLS_D)

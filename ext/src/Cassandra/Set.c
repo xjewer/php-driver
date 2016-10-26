@@ -388,7 +388,7 @@ php_cassandra_set_hash_value(zval *obj TSRMLS_DC)
 static void
 php_cassandra_set_free(php5to7_zend_object_free *object TSRMLS_DC)
 {
-  cassandra_set *self = PHP5TO7_ZEND_OBJECT_GET(set, object);
+  cassandra_set *self = PHP5TO7_ZEND_OBJECT_GET(cassandra_set, object);
   cassandra_set_entry *curr, *temp;
 
   HASH_ITER(hh, self->entries, curr, temp) {
@@ -407,14 +407,14 @@ static php5to7_zend_object
 php_cassandra_set_new(zend_class_entry *ce TSRMLS_DC)
 {
   cassandra_set *self =
-      PHP5TO7_ZEND_OBJECT_ECALLOC(set, ce);
+      PHP5TO7_ZEND_OBJECT_ECALLOC(cassandra_set, ce);
 
   self->entries = self->iter_curr = self->iter_temp = NULL;
   self->iter_index = 0;
   self->dirty = 1;
   PHP5TO7_ZVAL_UNDEF(self->type);
 
-  PHP5TO7_ZEND_OBJECT_INIT(set, self, ce);
+  PHP5TO7_ZEND_OBJECT_INIT(cassandra_set, self, ce);
 }
 
 void cassandra_define_Set(TSRMLS_D)

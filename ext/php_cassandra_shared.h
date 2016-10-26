@@ -123,7 +123,7 @@ php5to7_string_compare(php5to7_string s1, php5to7_string s2)
 }
 
 #define PHP5TO7_ZEND_OBJECT_GET(type_name, object) \
-  php_cassandra_##type_name##_object_fetch(object);
+  php_##type_name##_object_fetch(object);
 
 #define PHP5TO7_SMART_STR_INIT { NULL, 0 }
 #define PHP5TO7_SMART_STR_VAL(ss) ((ss).s ? (ss).s->val : NULL)
@@ -134,20 +134,20 @@ php5to7_string_compare(php5to7_string s1, php5to7_string s2)
 
 #define PHP5TO7_ZEND_ACC_FINAL ZEND_ACC_FINAL
 
-#define PHP5TO7_ZEND_OBJECT_ECALLOC(type_name, ce) (cassandra_##type_name *) \
-  ecalloc(1, sizeof(cassandra_##type_name) + zend_object_properties_size(ce))
+#define PHP5TO7_ZEND_OBJECT_ECALLOC(type_name, ce) \
+  (type_name *) ecalloc(1, sizeof(type_name) + zend_object_properties_size(ce))
 
 #define PHP5TO7_ZEND_OBJECT_INIT(type_name, self, ce) \
   PHP5TO7_ZEND_OBJECT_INIT_EX(type_name, type_name, self, ce)
 
-#define PHP5TO7_ZEND_OBJECT_INIT_EX(type_name, name, self, ce) do {             \
-  zend_object_std_init(&self->zval, ce TSRMLS_CC);                              \
-  ((zend_object_handlers *) &cassandra_##name##_handlers)->offset =             \
-        XtOffsetOf(cassandra_##type_name, zval);                                \
-  ((zend_object_handlers *) &cassandra_##name##_handlers)->free_obj =           \
-        php_cassandra_##name##_free;                                            \
-  self->zval.handlers = (zend_object_handlers *) &cassandra_##name##_handlers;  \
-  return &self->zval;                                                           \
+#define PHP5TO7_ZEND_OBJECT_INIT_EX(type_name, name, self, ce) do { \
+  zend_object_std_init(&self->zval, ce TSRMLS_CC);                  \
+  ((zend_object_handlers *) &name##_handlers)->offset =             \
+        XtOffsetOf(type_name, zval);                                \
+  ((zend_object_handlers *) &name##_handlers)->free_obj =           \
+        php_##name##_free;                                          \
+  self->zval.handlers = (zend_object_handlers *) &name##_handlers;  \
+  return &self->zval;                                               \
 } while(0)
 
 #define PHP5TO7_MAYBE_EFREE(p) ((void)0)
@@ -281,7 +281,7 @@ php5to7_string_compare(php5to7_string s1, php5to7_string s2)
 }
 
 #define PHP5TO7_ZEND_OBJECT_GET(type_name, object) \
-  (cassandra_##type_name *) object
+  (type_name *) object
 
 #define Z_RES_P(zv) (zv)
 #define Z_RES(zv) (&(zv))
@@ -296,8 +296,8 @@ php5to7_string_compare(php5to7_string s1, php5to7_string s2)
 
 #define PHP5TO7_ZEND_ACC_FINAL ZEND_ACC_FINAL_CLASS
 
-#define PHP5TO7_ZEND_OBJECT_ECALLOC(type_name, ce) (cassandra_##type_name *) \
-  ecalloc(1, sizeof(cassandra_##type_name))
+#define PHP5TO7_ZEND_OBJECT_ECALLOC(type_name, ce) (type_name *) \
+  ecalloc(1, sizeof(type_name))
 
 #define PHP5TO7_ZEND_OBJECT_INIT(type_name, self, ce) \
   PHP5TO7_ZEND_OBJECT_INIT_EX(type_name, type_name, self, ce)
@@ -308,8 +308,8 @@ php5to7_string_compare(php5to7_string s1, php5to7_string s2)
   object_properties_init(&self->zval, ce);                                                          \
   retval.handle   = zend_objects_store_put(self,                                                    \
                                            (zend_objects_store_dtor_t) zend_objects_destroy_object, \
-                                           php_cassandra_##name##_free, NULL TSRMLS_CC);            \
-  retval.handlers = (zend_object_handlers *) &cassandra_##name##_handlers;                          \
+                                           php_##name##_free, NULL TSRMLS_CC);            \
+  retval.handlers = (zend_object_handlers *) &name##_handlers;                          \
   return retval;                                                                                    \
 } while(0)
 

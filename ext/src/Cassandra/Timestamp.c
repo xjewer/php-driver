@@ -243,7 +243,7 @@ php_cassandra_timestamp_hash_value(zval *obj TSRMLS_DC)
 static void
 php_cassandra_timestamp_free(php5to7_zend_object_free *object TSRMLS_DC)
 {
-  cassandra_timestamp *self = PHP5TO7_ZEND_OBJECT_GET(timestamp, object);
+  cassandra_timestamp *self = PHP5TO7_ZEND_OBJECT_GET(cassandra_timestamp, object);
 
   zend_object_std_dtor(&self->zval TSRMLS_CC);
   PHP5TO7_MAYBE_EFREE(self);
@@ -253,9 +253,9 @@ static php5to7_zend_object
 php_cassandra_timestamp_new(zend_class_entry *ce TSRMLS_DC)
 {
   cassandra_timestamp *self =
-      PHP5TO7_ZEND_OBJECT_ECALLOC(timestamp, ce);
+      PHP5TO7_ZEND_OBJECT_ECALLOC(cassandra_timestamp, ce);
 
-  PHP5TO7_ZEND_OBJECT_INIT(timestamp, self, ce);
+  PHP5TO7_ZEND_OBJECT_INIT(cassandra_timestamp, self, ce);
 }
 
 void cassandra_define_Timestamp(TSRMLS_D)

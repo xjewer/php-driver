@@ -131,7 +131,7 @@ php_cassandra_default_schema_compare(zval *obj1, zval *obj2 TSRMLS_DC)
 static void
 php_cassandra_default_schema_free(php5to7_zend_object_free *object TSRMLS_DC)
 {
-  cassandra_schema *self = PHP5TO7_ZEND_OBJECT_GET(schema, object);
+  cassandra_schema *self = PHP5TO7_ZEND_OBJECT_GET(cassandra_schema, object);
 
   if (self->schema) {
     php_cassandra_del_ref(&self->schema);
@@ -146,11 +146,11 @@ static php5to7_zend_object
 php_cassandra_default_schema_new(zend_class_entry *ce TSRMLS_DC)
 {
   cassandra_schema *self =
-      PHP5TO7_ZEND_OBJECT_ECALLOC(schema, ce);
+      PHP5TO7_ZEND_OBJECT_ECALLOC(cassandra_schema, ce);
 
   self->schema = NULL;
 
-  PHP5TO7_ZEND_OBJECT_INIT_EX(schema, default_schema, self, ce);
+  PHP5TO7_ZEND_OBJECT_INIT_EX(cassandra_schema, cassandra_default_schema, self, ce);
 }
 
 void cassandra_define_DefaultSchema(TSRMLS_D)

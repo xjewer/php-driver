@@ -115,7 +115,7 @@ php_cassandra_type_custom_compare(zval *obj1, zval *obj2 TSRMLS_DC)
 static void
 php_cassandra_type_custom_free(php5to7_zend_object_free *object TSRMLS_DC)
 {
-  cassandra_type *self = PHP5TO7_ZEND_OBJECT_GET(type, object);
+  cassandra_type *self = PHP5TO7_ZEND_OBJECT_GET(cassandra_type, object);
 
   if (self->data_type) cass_data_type_free(self->data_type);
   if (self->name) {
@@ -130,13 +130,13 @@ php_cassandra_type_custom_free(php5to7_zend_object_free *object TSRMLS_DC)
 static php5to7_zend_object
 php_cassandra_type_custom_new(zend_class_entry *ce TSRMLS_DC)
 {
-  cassandra_type *self = PHP5TO7_ZEND_OBJECT_ECALLOC(type, ce);
+  cassandra_type *self = PHP5TO7_ZEND_OBJECT_ECALLOC(cassandra_type, ce);
 
   self->type = CASS_VALUE_TYPE_CUSTOM;
   self->data_type = cass_data_type_new(self->type);
   self->name = NULL;
 
-  PHP5TO7_ZEND_OBJECT_INIT_EX(type, type_custom, self, ce);
+  PHP5TO7_ZEND_OBJECT_INIT_EX(cassandra_type, cassandra_type_custom, self, ce);
 }
 
 void cassandra_define_TypeCustom(TSRMLS_D)

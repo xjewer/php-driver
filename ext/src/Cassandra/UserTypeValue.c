@@ -435,7 +435,7 @@ static void
 php_cassandra_user_type_value_free(php5to7_zend_object_free *object TSRMLS_DC)
 {
   cassandra_user_type_value *self =
-      PHP5TO7_ZEND_OBJECT_GET(user_type_value, object);
+      PHP5TO7_ZEND_OBJECT_GET(cassandra_user_type_value, object);
 
   zend_hash_destroy(&self->values);
   PHP5TO7_ZVAL_MAYBE_DESTROY(self->type);
@@ -448,7 +448,7 @@ static php5to7_zend_object
 php_cassandra_user_type_value_new(zend_class_entry *ce TSRMLS_DC)
 {
   cassandra_user_type_value *self =
-      PHP5TO7_ZEND_OBJECT_ECALLOC(user_type_value, ce);
+      PHP5TO7_ZEND_OBJECT_ECALLOC(cassandra_user_type_value, ce);
 
   zend_hash_init(&self->values, 0, NULL, ZVAL_PTR_DTOR, 0);
 #if PHP_MAJOR_VERSION >= 7
@@ -459,7 +459,7 @@ php_cassandra_user_type_value_new(zend_class_entry *ce TSRMLS_DC)
   self->dirty = 1;
   PHP5TO7_ZVAL_UNDEF(self->type);
 
-  PHP5TO7_ZEND_OBJECT_INIT(user_type_value, self, ce);
+  PHP5TO7_ZEND_OBJECT_INIT(cassandra_user_type_value, self, ce);
 }
 
 void cassandra_define_UserTypeValue(TSRMLS_D)

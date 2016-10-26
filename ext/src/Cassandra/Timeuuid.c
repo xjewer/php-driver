@@ -225,7 +225,7 @@ php_cassandra_timeuuid_hash_value(zval *obj TSRMLS_DC)
 static void
 php_cassandra_timeuuid_free(php5to7_zend_object_free *object TSRMLS_DC)
 {
-  cassandra_uuid *self = PHP5TO7_ZEND_OBJECT_GET(uuid, object);
+  cassandra_uuid *self = PHP5TO7_ZEND_OBJECT_GET(cassandra_uuid, object);
 
   zend_object_std_dtor(&self->zval TSRMLS_CC);
   PHP5TO7_MAYBE_EFREE(self);
@@ -235,9 +235,9 @@ static php5to7_zend_object
 php_cassandra_timeuuid_new(zend_class_entry *ce TSRMLS_DC)
 {
   cassandra_uuid *self =
-      PHP5TO7_ZEND_OBJECT_ECALLOC(uuid, ce);
+      PHP5TO7_ZEND_OBJECT_ECALLOC(cassandra_uuid, ce);
 
-  PHP5TO7_ZEND_OBJECT_INIT_EX(uuid, timeuuid, self, ce);
+  PHP5TO7_ZEND_OBJECT_INIT_EX(cassandra_uuid, cassandra_timeuuid, self, ce);
 }
 
 void

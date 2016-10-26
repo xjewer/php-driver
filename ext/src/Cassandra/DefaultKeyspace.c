@@ -541,7 +541,7 @@ php_cassandra_default_keyspace_compare(zval *obj1, zval *obj2 TSRMLS_DC)
 static void
 php_cassandra_default_keyspace_free(php5to7_zend_object_free *object TSRMLS_DC)
 {
-  cassandra_keyspace *self = PHP5TO7_ZEND_OBJECT_GET(keyspace, object);
+  cassandra_keyspace *self = PHP5TO7_ZEND_OBJECT_GET(cassandra_keyspace, object);
 
   if (self->schema) {
     php_cassandra_del_ref(&self->schema);
@@ -557,12 +557,12 @@ static php5to7_zend_object
 php_cassandra_default_keyspace_new(zend_class_entry *ce TSRMLS_DC)
 {
   cassandra_keyspace *self =
-      PHP5TO7_ZEND_OBJECT_ECALLOC(keyspace, ce);
+      PHP5TO7_ZEND_OBJECT_ECALLOC(cassandra_keyspace, ce);
 
   self->meta   = NULL;
   self->schema = NULL;
 
-  PHP5TO7_ZEND_OBJECT_INIT_EX(keyspace, default_keyspace, self, ce);
+  PHP5TO7_ZEND_OBJECT_INIT_EX(cassandra_keyspace, cassandra_default_keyspace, self, ce);
 }
 
 void cassandra_define_DefaultKeyspace(TSRMLS_D)

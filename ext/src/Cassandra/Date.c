@@ -237,7 +237,7 @@ php_cassandra_date_hash_value(zval *obj TSRMLS_DC)
 static void
 php_cassandra_date_free(php5to7_zend_object_free *object TSRMLS_DC)
 {
-  cassandra_date *self = PHP5TO7_ZEND_OBJECT_GET(date, object);
+  cassandra_date *self = PHP5TO7_ZEND_OBJECT_GET(cassandra_date, object);
 
   zend_object_std_dtor(&self->zval TSRMLS_CC);
   PHP5TO7_MAYBE_EFREE(self);
@@ -247,11 +247,11 @@ static php5to7_zend_object
 php_cassandra_date_new(zend_class_entry *ce TSRMLS_DC)
 {
   cassandra_date *self =
-      PHP5TO7_ZEND_OBJECT_ECALLOC(date, ce);
+      PHP5TO7_ZEND_OBJECT_ECALLOC(cassandra_date, ce);
 
   self->date = 0;
 
-  PHP5TO7_ZEND_OBJECT_INIT(date, self, ce);
+  PHP5TO7_ZEND_OBJECT_INIT(cassandra_date, self, ce);
 }
 
 void cassandra_define_Date(TSRMLS_D)

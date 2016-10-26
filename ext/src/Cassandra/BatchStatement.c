@@ -140,7 +140,7 @@ php_cassandra_batch_statement_compare(zval *obj1, zval *obj2 TSRMLS_DC)
 static void
 php_cassandra_batch_statement_free(php5to7_zend_object_free *object TSRMLS_DC)
 {
-  cassandra_statement *self = PHP5TO7_ZEND_OBJECT_GET(statement, object);
+  cassandra_statement *self = PHP5TO7_ZEND_OBJECT_GET(cassandra_statement, object);
 
   zend_hash_destroy(&self->statements);
 
@@ -152,13 +152,13 @@ static php5to7_zend_object
 php_cassandra_batch_statement_new(zend_class_entry *ce TSRMLS_DC)
 {
   cassandra_statement *self =
-      PHP5TO7_ZEND_OBJECT_ECALLOC(statement, ce);
+      PHP5TO7_ZEND_OBJECT_ECALLOC(cassandra_statement, ce);
 
   self->type       = CASSANDRA_BATCH_STATEMENT;
   self->batch_type = CASS_BATCH_TYPE_LOGGED;
   zend_hash_init(&self->statements, 0, NULL, (dtor_func_t) cassandra_batch_statement_entry_dtor, 0);
 
-  PHP5TO7_ZEND_OBJECT_INIT_EX(statement, batch_statement, self, ce);
+  PHP5TO7_ZEND_OBJECT_INIT_EX(cassandra_statement, cassandra_batch_statement, self, ce);
 }
 
 void cassandra_define_BatchStatement(TSRMLS_D)

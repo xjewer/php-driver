@@ -1259,7 +1259,7 @@ static void
 php_cassandra_cluster_builder_free(php5to7_zend_object_free *object TSRMLS_DC)
 {
   cassandra_cluster_builder *self =
-      PHP5TO7_ZEND_OBJECT_GET(cluster_builder, object);
+      PHP5TO7_ZEND_OBJECT_GET(cassandra_cluster_builder, object);
 
   efree(self->contact_points);
   self->contact_points = NULL;
@@ -1312,7 +1312,7 @@ static php5to7_zend_object
 php_cassandra_cluster_builder_new(zend_class_entry *ce TSRMLS_DC)
 {
   cassandra_cluster_builder *self =
-      PHP5TO7_ZEND_OBJECT_ECALLOC(cluster_builder, ce);
+      PHP5TO7_ZEND_OBJECT_ECALLOC(cassandra_cluster_builder, ce);
 
   self->contact_points = estrdup("127.0.0.1");
   self->port = 9042;
@@ -1348,7 +1348,7 @@ php_cassandra_cluster_builder_new(zend_class_entry *ce TSRMLS_DC)
   PHP5TO7_ZVAL_UNDEF(self->retry_policy);
   PHP5TO7_ZVAL_UNDEF(self->timestamp_gen);
 
-  PHP5TO7_ZEND_OBJECT_INIT(cluster_builder, self, ce);
+  PHP5TO7_ZEND_OBJECT_INIT(cassandra_cluster_builder, self, ce);
 }
 
 void cassandra_define_ClusterBuilder(TSRMLS_D)

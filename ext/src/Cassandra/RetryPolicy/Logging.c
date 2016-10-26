@@ -55,7 +55,7 @@ static zend_object_handlers cassandra_retry_policy_logging_handlers;
 static void
 php_cassandra_retry_policy_logging_free(php5to7_zend_object_free *object TSRMLS_DC)
 {
-  cassandra_retry_policy *self = PHP5TO7_ZEND_OBJECT_GET(retry_policy, object);
+  cassandra_retry_policy *self = PHP5TO7_ZEND_OBJECT_GET(cassandra_retry_policy, object);
 
   if (self->policy) {
     cass_retry_policy_free(self->policy);
@@ -68,11 +68,11 @@ php_cassandra_retry_policy_logging_free(php5to7_zend_object_free *object TSRMLS_
 static php5to7_zend_object
 php_cassandra_retry_policy_logging_new(zend_class_entry *ce TSRMLS_DC)
 {
-  cassandra_retry_policy *self = PHP5TO7_ZEND_OBJECT_ECALLOC(retry_policy, ce);
+  cassandra_retry_policy *self = PHP5TO7_ZEND_OBJECT_ECALLOC(cassandra_retry_policy, ce);
 
   self->policy = NULL;
 
-  PHP5TO7_ZEND_OBJECT_INIT_EX(retry_policy, retry_policy_logging, self, ce);
+  PHP5TO7_ZEND_OBJECT_INIT_EX(cassandra_retry_policy, cassandra_retry_policy_logging, self, ce);
 }
 
 void cassandra_define_RetryPolicyLogging(TSRMLS_D)

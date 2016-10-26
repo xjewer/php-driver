@@ -44,7 +44,7 @@ php_cassandra_ssl_compare(zval *obj1, zval *obj2 TSRMLS_DC)
 static void
 php_cassandra_ssl_free(php5to7_zend_object_free *object TSRMLS_DC)
 {
-  cassandra_ssl *self = PHP5TO7_ZEND_OBJECT_GET(ssl, object);
+  cassandra_ssl *self = PHP5TO7_ZEND_OBJECT_GET(cassandra_ssl, object);
 
   cass_ssl_free(self->ssl);
 
@@ -56,11 +56,11 @@ static php5to7_zend_object
 php_cassandra_ssl_new(zend_class_entry *ce TSRMLS_DC)
 {
   cassandra_ssl *self =
-      PHP5TO7_ZEND_OBJECT_ECALLOC(ssl, ce);
+      PHP5TO7_ZEND_OBJECT_ECALLOC(cassandra_ssl, ce);
 
   self->ssl = cass_ssl_new();
 
-  PHP5TO7_ZEND_OBJECT_INIT(ssl, self, ce);
+  PHP5TO7_ZEND_OBJECT_INIT(cassandra_ssl, self, ce);
 }
 
 void cassandra_define_SSLOptions(TSRMLS_D)

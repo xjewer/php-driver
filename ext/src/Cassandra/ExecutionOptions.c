@@ -225,7 +225,7 @@ static void
 php_cassandra_execution_options_free(php5to7_zend_object_free *object TSRMLS_DC)
 {
   cassandra_execution_options *self =
-      PHP5TO7_ZEND_OBJECT_GET(execution_options, object);
+      PHP5TO7_ZEND_OBJECT_GET(cassandra_execution_options, object);
 
   if (self->paging_state_token) {
     efree(self->paging_state_token);
@@ -242,7 +242,7 @@ static php5to7_zend_object
 php_cassandra_execution_options_new(zend_class_entry *ce TSRMLS_DC)
 {
   cassandra_execution_options *self =
-      PHP5TO7_ZEND_OBJECT_ECALLOC(execution_options, ce);
+      PHP5TO7_ZEND_OBJECT_ECALLOC(cassandra_execution_options, ce);
 
   self->consistency = -1;
   self->serial_consistency = -1;
@@ -254,7 +254,7 @@ php_cassandra_execution_options_new(zend_class_entry *ce TSRMLS_DC)
   PHP5TO7_ZVAL_UNDEF(self->timeout);
   PHP5TO7_ZVAL_UNDEF(self->retry_policy);
 
-  PHP5TO7_ZEND_OBJECT_INIT(execution_options, self, ce);
+  PHP5TO7_ZEND_OBJECT_INIT(cassandra_execution_options, self, ce);
 
 }
 

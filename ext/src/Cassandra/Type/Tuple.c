@@ -194,7 +194,7 @@ php_cassandra_type_tuple_compare(zval *obj1, zval *obj2 TSRMLS_DC)
 static void
 php_cassandra_type_tuple_free(php5to7_zend_object_free *object TSRMLS_DC)
 {
-  cassandra_type *self = PHP5TO7_ZEND_OBJECT_GET(type, object);
+  cassandra_type *self = PHP5TO7_ZEND_OBJECT_GET(cassandra_type, object);
 
   if (self->data_type) cass_data_type_free(self->data_type);
   zend_hash_destroy(&self->types);
@@ -206,13 +206,13 @@ php_cassandra_type_tuple_free(php5to7_zend_object_free *object TSRMLS_DC)
 static php5to7_zend_object
 php_cassandra_type_tuple_new(zend_class_entry *ce TSRMLS_DC)
 {
-  cassandra_type *self = PHP5TO7_ZEND_OBJECT_ECALLOC(type, ce);
+  cassandra_type *self = PHP5TO7_ZEND_OBJECT_ECALLOC(cassandra_type, ce);
 
   self->type = CASS_VALUE_TYPE_TUPLE;
   self->data_type = cass_data_type_new(self->type);
   zend_hash_init(&self->types, 0, NULL, ZVAL_PTR_DTOR, 0);
 
-  PHP5TO7_ZEND_OBJECT_INIT_EX(type, type_tuple, self, ce);
+  PHP5TO7_ZEND_OBJECT_INIT_EX(cassandra_type, cassandra_type_tuple, self, ce);
 }
 
 void cassandra_define_TypeTuple(TSRMLS_D)

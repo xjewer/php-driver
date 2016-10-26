@@ -173,7 +173,7 @@ php_cassandra_blob_hash_value(zval *obj TSRMLS_DC)
 static void
 php_cassandra_blob_free(php5to7_zend_object_free *object TSRMLS_DC)
 {
-  cassandra_blob *self = PHP5TO7_ZEND_OBJECT_GET(blob, object);
+  cassandra_blob *self = PHP5TO7_ZEND_OBJECT_GET(cassandra_blob, object);
 
   if (self->data) {
     efree(self->data);
@@ -187,9 +187,9 @@ static php5to7_zend_object
 php_cassandra_blob_new(zend_class_entry *ce TSRMLS_DC)
 {
   cassandra_blob *self =
-      PHP5TO7_ZEND_OBJECT_ECALLOC(blob, ce);
+      PHP5TO7_ZEND_OBJECT_ECALLOC(cassandra_blob, ce);
 
-  PHP5TO7_ZEND_OBJECT_INIT(blob, self, ce);
+  PHP5TO7_ZEND_OBJECT_INIT(cassandra_blob, self, ce);
 }
 
 void cassandra_define_Blob(TSRMLS_D)

@@ -290,7 +290,7 @@ php_cassandra_ssl_builder_compare(zval *obj1, zval *obj2 TSRMLS_DC)
 static void
 php_cassandra_ssl_builder_free(php5to7_zend_object_free *object TSRMLS_DC)
 {
-  cassandra_ssl_builder *self = PHP5TO7_ZEND_OBJECT_GET(ssl_builder, object);
+  cassandra_ssl_builder *self = PHP5TO7_ZEND_OBJECT_GET(cassandra_ssl_builder, object);
 
   if (self->trusted_certs) {
     int i;
@@ -318,7 +318,7 @@ static php5to7_zend_object
 php_cassandra_ssl_builder_new(zend_class_entry *ce TSRMLS_DC)
 {
   cassandra_ssl_builder *self =
-      PHP5TO7_ZEND_OBJECT_ECALLOC(ssl_builder, ce);
+      PHP5TO7_ZEND_OBJECT_ECALLOC(cassandra_ssl_builder, ce);
 
   self->flags             = 0;
   self->trusted_certs     = NULL;
@@ -327,7 +327,7 @@ php_cassandra_ssl_builder_new(zend_class_entry *ce TSRMLS_DC)
   self->private_key       = NULL;
   self->passphrase        = NULL;
 
-  PHP5TO7_ZEND_OBJECT_INIT(ssl_builder, self, ce);
+  PHP5TO7_ZEND_OBJECT_INIT(cassandra_ssl_builder, self, ce);
 }
 
 void cassandra_define_SSLOptionsBuilder(TSRMLS_D)
