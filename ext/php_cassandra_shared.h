@@ -22,7 +22,6 @@
 #endif
 
 #include <gmp.h>
-#include <cassandra.h>
 
 /* Ensure Visual Studio 2010 does not load MSVC++ stdint definitions */
 #ifdef _WIN32

@@ -26,6 +26,7 @@
 #include <uv.h>
 
 #include "util/types.h"
+#include "util/ref.h"
 
 #define PHP_CASSANDRA_DEFAULT_LOG       "cassandra.log"
 #define PHP_CASSANDRA_DEFAULT_LOG_LEVEL "ERROR"
@@ -163,7 +164,7 @@ php_cassandra_session_dtor(php5to7_zend_resource rsrc TSRMLS_DC)
 
   if (psession) {
     cass_future_free(psession->future);
-    cass_session_free(psession->session);
+    php_cassandra_del_peref(&psession->session, 1);
     pefree(psession, 1);
     CASSANDRA_G(persistent_sessions)--;
     rsrc->ptr = NULL;
@@ -321,8 +322,9 @@ int php_cassandra_minit(INIT_FUNC_ARGS)
 
   cassandra_define_Cassandra(TSRMLS_C);
   cassandra_define_Cluster(TSRMLS_C);
-  cassandra_define_ClusterBuilder(TSRMLS_C);
   cassandra_define_DefaultCluster(TSRMLS_C);
+  cassandra_define_ClusterBuilder(TSRMLS_C);
+  cassandra_define_DefaultClusterBuilder(TSRMLS_C);
   cassandra_define_Future(TSRMLS_C);
   cassandra_define_FuturePreparedStatement(TSRMLS_C);
   cassandra_define_FutureRows(TSRMLS_C);

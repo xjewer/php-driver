@@ -20,8 +20,6 @@
 
 zend_class_entry *cassandra_future_prepared_statement_ce = NULL;
 
-ZEND_EXTERN_MODULE_GLOBALS(cassandra)
-
 PHP_METHOD(FuturePreparedStatement, get)
 {
   zval *timeout = NULL;

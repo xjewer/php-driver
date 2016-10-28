@@ -15,71 +15,35 @@
  */
 
 #include "php_cassandra.h"
-
 #include "util/future.h"
+#include "util/ref.h"
+
+#include "FutureSession.h"
 
 zend_class_entry *cassandra_future_session_ce = NULL;
-
-ZEND_EXTERN_MODULE_GLOBALS(cassandra)
 
 PHP_METHOD(FutureSession, get)
 {
   zval *timeout = NULL;
-  cassandra_session *session = NULL;
-  CassError rc = CASS_OK;
-
-  cassandra_future_session *future = PHP_CASSANDRA_GET_FUTURE_SESSION(getThis());
-
-  if (!PHP5TO7_ZVAL_IS_UNDEF(future->default_session)) {
-    RETURN_ZVAL(PHP5TO7_ZVAL_MAYBE_P(future->default_session), 1, 0);
-  }
-
-  if (future->exception_message) {
-    zend_throw_exception_ex(exception_class(future->exception_code),
-      future->exception_code TSRMLS_CC, future->exception_message);
-    return;
-  }
+  cassandra_session_base *session = NULL;
+  cassandra_future_session_base *future = NULL;
 
   if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|z", &timeout) == FAILURE) {
     return;
   }
 
-  if (php_cassandra_future_wait_timed(future->future, timeout TSRMLS_CC) == FAILURE) {
-    return;
-  }
+  future = &PHP_CASSANDRA_GET_FUTURE_SESSION(getThis())->base;
 
-  rc = cass_future_error_code(future->future);
-
-  if (rc != CASS_OK) {
-    const char *message;
-    size_t message_len;
-    cass_future_error_message(future->future, &message, &message_len);
-
-    if (future->persist) {
-      future->exception_message = estrndup(message, message_len);
-      future->exception_code    = rc;
-
-      if (PHP5TO7_ZEND_HASH_DEL(&EG(persistent_list), future->hash_key, future->hash_key_len + 1)) {
-        future->session = NULL;
-        future->future  = NULL;
-      }
-
-      zend_throw_exception_ex(exception_class(future->exception_code),
-        future->exception_code TSRMLS_CC, future->exception_message);
-      return;
-    }
-
-    zend_throw_exception_ex(exception_class(rc), rc TSRMLS_CC,
-      "%.*s", (int) message_len, message);
-    return;
+  if (!PHP5TO7_ZVAL_IS_UNDEF(future->default_session)) {
+    RETURN_ZVAL(PHP5TO7_ZVAL_MAYBE_P(future->default_session), 1, 0);
   }
 
   object_init_ex(return_value, cassandra_default_session_ce);
+  session = &PHP_CASSANDRA_GET_SESSION(return_value)->base;
+
+  php_cassandra_future_session_get(future, timeout, session);
 
   PHP5TO7_ZVAL_COPY(PHP5TO7_ZVAL_MAYBE_P(future->default_session), return_value);
-  session = PHP_CASSANDRA_GET_SESSION(return_value);
-  session->session = future->session;
-  session->persist = future->persist;
 }
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_timeout, 0, ZEND_RETURN_VALUE, 0)
@@ -116,19 +80,7 @@ php_cassandra_future_session_free(php5to7_zend_object_free *object TSRMLS_DC)
   cassandra_future_session *self =
       PHP5TO7_ZEND_OBJECT_GET(cassandra_future_session, object);
 
-  if (self->persist) {
-    efree(self->hash_key);
-  } else {
-    if (self->future) {
-      cass_future_free(self->future);
-    }
-    if (self->session) {
-      cass_session_free(self->session);
-    }
-  }
-
-  if (self->exception_message)
-    efree(self->exception_message);
+  php_cassandra_future_session_init(&self->base);
 
   zend_object_std_dtor(&self->zval TSRMLS_CC);
   PHP5TO7_MAYBE_EFREE(self);
@@ -140,11 +92,7 @@ php_cassandra_future_session_new(zend_class_entry *ce TSRMLS_DC)
   cassandra_future_session *self
       = PHP5TO7_ZEND_OBJECT_ECALLOC(cassandra_future_session, ce);
 
-  self->session           = NULL;
-  self->future            = NULL;
-  self->exception_message = NULL;
-  self->hash_key          = NULL;
-  self->persist           = 0;
+  php_cassandra_future_session_destroy(&self->base);
 
   PHP5TO7_ZEND_OBJECT_INIT(cassandra_future_session, self, ce);
 }
@@ -163,4 +111,77 @@ void cassandra_define_FutureSession(TSRMLS_D)
   cassandra_future_session_handlers.get_properties  = php_cassandra_future_session_properties;
   cassandra_future_session_handlers.compare_objects = php_cassandra_future_session_compare;
   cassandra_future_session_handlers.clone_obj = NULL;
+}
+
+void php_cassandra_future_session_init(cassandra_future_session_base *future)
+{
+  future->session           = NULL;
+  future->future            = NULL;
+  future->exception_message = NULL;
+  future->hash_key          = NULL;
+  future->persist           = 0;
+}
+
+void php_cassandra_future_session_destroy(cassandra_future_session_base *future)
+{
+  if (future->persist) {
+    efree(future->hash_key);
+  } else {
+    if (future->future) {
+      cass_future_free(future->future);
+    }
+  }
+
+  php_cassandra_del_peref(&future->session, 1);
+
+  if (future->exception_message) {
+    efree(future->exception_message);
+  }
+}
+
+void php_cassandra_future_session_get(cassandra_future_session_base *future,
+                                      zval *timeout,
+                                      cassandra_session_base *session)
+{
+  CassError rc = CASS_OK;
+
+  session->session = php_cassandra_add_ref(future->session);
+  session->persist = future->persist;
+
+  if (future->exception_message) {
+    zend_throw_exception_ex(exception_class(future->exception_code),
+                            future->exception_code TSRMLS_CC, future->exception_message);
+    return;
+  }
+
+  if (php_cassandra_future_wait_timed(future->future, timeout TSRMLS_CC) == FAILURE) {
+    return;
+  }
+
+  rc = cass_future_error_code(future->future);
+
+  if (rc != CASS_OK) {
+    const char *message;
+    size_t message_len;
+    cass_future_error_message(future->future, &message, &message_len);
+
+    if (future->persist) {
+      future->exception_message = estrndup(message, message_len);
+      future->exception_code    = rc;
+
+      if (PHP5TO7_ZEND_HASH_DEL(&EG(persistent_list), future->hash_key, future->hash_key_len + 1)) {
+        // TODO: Is this right?
+        php_cassandra_del_peref(&future->session, 1);
+        future->future  = NULL;
+      }
+
+      zend_throw_exception_ex(exception_class(future->exception_code),
+                              future->exception_code TSRMLS_CC, future->exception_message);
+      return;
+    }
+
+    zend_throw_exception_ex(exception_class(rc), rc TSRMLS_CC,
+                            "%.*s", (int) message_len, message);
+    return;
+  }
 }

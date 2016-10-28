@@ -18,8 +18,6 @@
 
 zend_class_entry *cassandra_simple_statement_ce = NULL;
 
-ZEND_EXTERN_MODULE_GLOBALS(cassandra)
-
 PHP_METHOD(SimpleStatement, __construct)
 {
   zval *cql = NULL;

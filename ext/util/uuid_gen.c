@@ -18,8 +18,6 @@
 #include <stdlib.h>
 #include "util/uuid_gen.h"
 
-ZEND_EXTERN_MODULE_GLOBALS(cassandra)
-
 static CassUuidGen* get_uuid_gen(TSRMLS_D) {
   /* Create a new uuid generator if our PID has changed. This prevents the same
    * UUIDs from being generated in forked processes.

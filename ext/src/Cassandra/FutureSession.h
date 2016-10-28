@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-#ifndef PHP_CASSANDRA_REF_H
-#define PHP_CASSANDRA_REF_H
+#ifndef PHP_CASSANDRA_FUTURE_SESSION_H
+#define PHP_CASSANDRA_FUTURE_SESSION_H
 
-cassandra_ref *php_cassandra_new_peref(void *data, cassandra_free_function destructor, int persistent);
-void php_cassandra_del_peref(cassandra_ref **ref_ptr, int persistent);
+void php_cassandra_future_session_init(cassandra_future_session_base *future);
 
-#define php_cassandra_new_ref(data, destructor) php_cassandra_new_peref(data, destructor, 0)
-#define php_cassandra_del_ref(ref) php_cassandra_del_peref(ref, 0)
-#define php_cassandra_add_ref(ref) (++ref->count, ref)
+void php_cassandra_future_session_destroy(cassandra_future_session_base *future);
 
-#endif /* PHP_CASSANDRA_REF_H */
+void php_cassandra_future_session_get(cassandra_future_session_base *future,
+                                      zval *timeout,
+                                      cassandra_session_base *session);
+
+#endif /* PHP_CASSANDRA_FUTURE_SESSION_H */

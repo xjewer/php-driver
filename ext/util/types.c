@@ -37,8 +37,6 @@
 #include "src/Cassandra/Type/Tuple.h"
 #include "src/Cassandra/Type/UserType.h"
 
-ZEND_EXTERN_MODULE_GLOBALS(cassandra)
-
 struct node_s {
   struct node_s *parent;
   const char    *name;

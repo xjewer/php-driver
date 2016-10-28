@@ -32,8 +32,6 @@ void cassandra_batch_statement_entry_dtor(php5to7_dtor dest)
   efree(batch_statement_entry);
 }
 
-ZEND_EXTERN_MODULE_GLOBALS(cassandra)
-
 PHP_METHOD(BatchStatement, __construct)
 {
   zval *type = NULL;

@@ -17,6 +17,8 @@
 #ifndef PHP_CASSANDRA_H
 #define PHP_CASSANDRA_H
 
+#include <cassandra.h>
+
 #include "php_cassandra_shared.h"
 
 extern zend_module_entry cassandra_module_entry;

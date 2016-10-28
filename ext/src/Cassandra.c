@@ -20,7 +20,7 @@ zend_class_entry *cassandra_ce = NULL;
 
 PHP_METHOD(Cassandra, cluster)
 {
-  object_init_ex(return_value, cassandra_cluster_builder_ce);
+  object_init_ex(return_value, cassandra_default_cluster_builder_ce);
 }
 
 PHP_METHOD(Cassandra, ssl)

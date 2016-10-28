@@ -207,7 +207,7 @@ PHP_CASSANDRA_BEGIN_OBJECT_TYPE(user_type_value)
   int dirty;
 PHP_CASSANDRA_END_OBJECT_TYPE(user_type_value)
 
-PHP_CASSANDRA_BEGIN_OBJECT_TYPE(cluster)
+typedef struct {
   cass_byte_t *data;
   CassCluster *cluster;
   long default_consistency;
@@ -216,6 +216,10 @@ PHP_CASSANDRA_BEGIN_OBJECT_TYPE(cluster)
   cass_bool_t persist;
   char *hash_key;
   int hash_key_len;
+} cassandra_cluster_base;
+
+PHP_CASSANDRA_BEGIN_OBJECT_TYPE(cluster)
+  cassandra_cluster_base base;
 PHP_CASSANDRA_END_OBJECT_TYPE(cluster)
 
 typedef enum {
@@ -269,7 +273,7 @@ typedef struct {
 
 PHP_CASSANDRA_BEGIN_OBJECT_TYPE(rows)
   cassandra_ref *statement;
-  php5to7_zval session;
+  cassandra_ref *session;
   php5to7_zval rows;
   php5to7_zval next_rows;
   cassandra_ref *result;
@@ -279,13 +283,13 @@ PHP_CASSANDRA_END_OBJECT_TYPE(rows)
 
 PHP_CASSANDRA_BEGIN_OBJECT_TYPE(future_rows)
   cassandra_ref *statement;
-  php5to7_zval session;
+  cassandra_ref *session;
   php5to7_zval rows;
   cassandra_ref *result;
   CassFuture *future;
 PHP_CASSANDRA_END_OBJECT_TYPE(future_rows)
 
-PHP_CASSANDRA_BEGIN_OBJECT_TYPE(cluster_builder)
+typedef struct {
   char *contact_points;
   int port;
   cassandra_load_balancing load_balancing_policy;
@@ -318,6 +322,10 @@ PHP_CASSANDRA_BEGIN_OBJECT_TYPE(cluster_builder)
   char *whitelist_hosts;
   char *blacklist_dcs;
   char *whitelist_dcs;
+} cassandra_cluster_builder_base;
+
+PHP_CASSANDRA_BEGIN_OBJECT_TYPE(cluster_builder)
+  cassandra_cluster_builder_base base;
 PHP_CASSANDRA_END_OBJECT_TYPE(cluster_builder)
 
 PHP_CASSANDRA_BEGIN_OBJECT_TYPE(future_prepared_statement)
@@ -333,28 +341,36 @@ PHP_CASSANDRA_BEGIN_OBJECT_TYPE(future_close)
   CassFuture *future;
 PHP_CASSANDRA_END_OBJECT_TYPE(future_close)
 
-PHP_CASSANDRA_BEGIN_OBJECT_TYPE(future_session)
+typedef struct {
   CassFuture *future;
-  CassSession *session;
+  cassandra_ref *session;
   php5to7_zval default_session;
   cass_bool_t persist;
   char *hash_key;
   int hash_key_len;
   char *exception_message;
   CassError exception_code;
+} cassandra_future_session_base;
+
+PHP_CASSANDRA_BEGIN_OBJECT_TYPE(future_session)
+  cassandra_future_session_base base;
 PHP_CASSANDRA_END_OBJECT_TYPE(future_session)
 
 typedef struct {
   CassFuture *future;
-  CassSession *session;
+  cassandra_ref *session;
 } cassandra_psession;
 
-PHP_CASSANDRA_BEGIN_OBJECT_TYPE(session)
-  CassSession *session;
+typedef struct {
+  cassandra_ref *session;
   long default_consistency;
   int default_page_size;
   php5to7_zval default_timeout;
   cass_bool_t persist;
+} cassandra_session_base;
+
+PHP_CASSANDRA_BEGIN_OBJECT_TYPE(session)
+  cassandra_session_base base;
 PHP_CASSANDRA_END_OBJECT_TYPE(session)
 
 PHP_CASSANDRA_BEGIN_OBJECT_TYPE(ssl)
@@ -554,6 +570,7 @@ extern PHP_CASSANDRA_API zend_class_entry *cassandra_ce;
 extern PHP_CASSANDRA_API zend_class_entry *cassandra_cluster_ce;
 extern PHP_CASSANDRA_API zend_class_entry *cassandra_default_cluster_ce;
 extern PHP_CASSANDRA_API zend_class_entry *cassandra_cluster_builder_ce;
+extern PHP_CASSANDRA_API zend_class_entry *cassandra_default_cluster_builder_ce;
 extern PHP_CASSANDRA_API zend_class_entry *cassandra_ssl_ce;
 extern PHP_CASSANDRA_API zend_class_entry *cassandra_ssl_builder_ce;
 extern PHP_CASSANDRA_API zend_class_entry *cassandra_future_ce;
@@ -601,6 +618,7 @@ extern PHP_CASSANDRA_API zend_class_entry *cassandra_rows_ce;
 void cassandra_define_Cassandra(TSRMLS_D);
 void cassandra_define_Cluster(TSRMLS_D);
 void cassandra_define_ClusterBuilder(TSRMLS_D);
+void cassandra_define_DefaultClusterBuilder(TSRMLS_D);
 void cassandra_define_DefaultCluster(TSRMLS_D);
 void cassandra_define_Future(TSRMLS_D);
 void cassandra_define_FuturePreparedStatement(TSRMLS_D);

@@ -20,8 +20,6 @@
 
 zend_class_entry *cassandra_execution_options_ce = NULL;
 
-ZEND_EXTERN_MODULE_GLOBALS(cassandra)
-
 PHP_METHOD(ExecutionOptions, __construct)
 {
   zval *options = NULL;

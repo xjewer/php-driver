@@ -18,8 +18,6 @@
 
 zend_class_entry *cassandra_future_value_ce = NULL;
 
-ZEND_EXTERN_MODULE_GLOBALS(cassandra)
-
 PHP_METHOD(FutureValue, get)
 {
   zval *timeout = NULL;

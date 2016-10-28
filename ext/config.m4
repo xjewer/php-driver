@@ -29,6 +29,7 @@ if test "$PHP_CASSANDRA" != "no"; then
     src/Cassandra/Blob.c \
     src/Cassandra/Cluster.c \
     src/Cassandra/Cluster/Builder.c \
+    src/Cassandra/Cluster/DefaultBuilder.c \
     src/Cassandra/Collection.c \
     src/Cassandra/Column.c \
     src/Cassandra/Date.c \
