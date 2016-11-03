@@ -568,7 +568,7 @@ void php_cassandra_session_destroy(cassandra_session_base *session)
 void php_cassandra_session_execute(cassandra_session_base *session,
                                    zval *statement,
                                    zval *options,
-                                   zval *return_value)
+                                   zval *return_value TSRMLS_DC)
 {
   cassandra_statement *stmt = NULL;
   HashTable *arguments = NULL;
@@ -698,7 +698,7 @@ void php_cassandra_session_execute(cassandra_session_base *session,
 void php_cassandra_session_execute_async(cassandra_session_base *session,
                                          zval *statement,
                                          zval *options,
-                                         zval *return_value)
+                                         zval *return_value TSRMLS_DC)
 {
   cassandra_statement *stmt = NULL;
   HashTable *arguments = NULL;
@@ -787,7 +787,7 @@ void php_cassandra_session_execute_async(cassandra_session_base *session,
 void php_cassandra_session_prepare(cassandra_session_base *session,
                                    zval *cql,
                                    zval *options,
-                                   zval *return_value)
+                                   zval *return_value TSRMLS_DC)
 {
   cassandra_execution_options *opts = NULL;
   CassFuture *future = NULL;
@@ -819,7 +819,7 @@ void php_cassandra_session_prepare(cassandra_session_base *session,
 void php_cassandra_session_prepare_async(cassandra_session_base *session,
                                          zval *cql,
                                          zval *options,
-                                         zval *return_value)
+                                         zval *return_value TSRMLS_DC)
 {
   CassFuture *future = NULL;
   cassandra_future_prepared_statement *future_prepared = NULL;
@@ -835,7 +835,7 @@ void php_cassandra_session_prepare_async(cassandra_session_base *session,
 
 void php_cassandra_session_close(cassandra_session_base *session,
                                  zval *timeout,
-                                 zval *return_value)
+                                 zval *return_value TSRMLS_DC)
 {
   CassFuture *future = NULL;
 
@@ -851,7 +851,7 @@ void php_cassandra_session_close(cassandra_session_base *session,
 }
 
 void php_cassandra_session_close_async(cassandra_session_base *session,
-                                       zval *return_value)
+                                       zval *return_value TSRMLS_DC)
 {
   cassandra_future_close *future = NULL;
 
@@ -867,7 +867,7 @@ void php_cassandra_session_close_async(cassandra_session_base *session,
 }
 
 void php_cassandra_session_schema(cassandra_session_base *session,
-                                  zval *return_value)
+                                  zval *return_value TSRMLS_DC)
 {
   cassandra_schema *schema;
 

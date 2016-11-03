@@ -24,31 +24,31 @@ void php_cassandra_session_destroy(cassandra_session_base *session);
 void php_cassandra_session_execute(cassandra_session_base *session,
                                    zval *statement,
                                    zval *options,
-                                   zval *return_value);
+                                   zval *return_value TSRMLS_DC);
 
 void php_cassandra_session_execute_async(cassandra_session_base *session,
                                          zval *statement,
                                          zval *options,
-                                         zval *return_value);
+                                         zval *return_value TSRMLS_DC);
 
 void php_cassandra_session_prepare(cassandra_session_base *session,
                                    zval *cql,
                                    zval *options,
-                                   zval *return_value);
+                                   zval *return_value TSRMLS_DC);
 
 void php_cassandra_session_prepare_async(cassandra_session_base *session,
                                          zval *cql,
                                          zval *options,
-                                         zval *return_value);
+                                         zval *return_value TSRMLS_DC);
 
 void php_cassandra_session_close(cassandra_session_base *session,
                                  zval *timeout,
-                                 zval *return_value);
+                                 zval *return_value TSRMLS_DC);
 
 void php_cassandra_session_close_async(cassandra_session_base *session,
-                                       zval *return_value);
+                                       zval *return_value TSRMLS_DC);
 
 void php_cassandra_session_schema(cassandra_session_base *session,
-                                  zval *return_value);
+                                  zval *return_value TSRMLS_DC);
 
 #endif /* PHP_CASSANDRA_SESSION_H */

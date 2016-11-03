@@ -15,6 +15,7 @@
  */
 
 #include "php_cassandra.h"
+#include "version.h"
 
 zend_class_entry *cassandra_ce = NULL;
 

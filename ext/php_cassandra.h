@@ -29,6 +29,4 @@ PHP_RINIT_FUNCTION(cassandra);
 PHP_RSHUTDOWN_FUNCTION(cassandra);
 PHP_MINFO_FUNCTION(cassandra);
 
-ZEND_EXTERN_MODULE_GLOBALS(cassandra)
-
 #endif /* PHP_CASSANDRA_H */

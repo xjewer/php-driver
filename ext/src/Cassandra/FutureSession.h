@@ -23,6 +23,6 @@ void php_cassandra_future_session_destroy(cassandra_future_session_base *future)
 
 void php_cassandra_future_session_get(cassandra_future_session_base *future,
                                       zval *timeout,
-                                      cassandra_session_base *session);
+                                      cassandra_session_base *session TSRMLS_DC);
 
 #endif /* PHP_CASSANDRA_FUTURE_SESSION_H */

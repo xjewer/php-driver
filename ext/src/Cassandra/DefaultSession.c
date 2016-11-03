@@ -32,7 +32,7 @@ PHP_METHOD(DefaultSession, execute)
 
   self = PHP_CASSANDRA_GET_SESSION(getThis());
 
-  php_cassandra_session_execute(&self->base, statement, options, return_value);
+  php_cassandra_session_execute(&self->base, statement, options, return_value TSRMLS_CC);
 }
 
 PHP_METHOD(DefaultSession, executeAsync)
@@ -47,7 +47,7 @@ PHP_METHOD(DefaultSession, executeAsync)
 
   self = PHP_CASSANDRA_GET_SESSION(getThis());
 
-  php_cassandra_session_execute_async(&self->base, statement, options, return_value);
+  php_cassandra_session_execute_async(&self->base, statement, options, return_value TSRMLS_CC);
 }
 
 PHP_METHOD(DefaultSession, prepare)
@@ -62,7 +62,7 @@ PHP_METHOD(DefaultSession, prepare)
 
   self = PHP_CASSANDRA_GET_SESSION(getThis());
 
-  php_cassandra_session_prepare(&self->base, cql, options, return_value);
+  php_cassandra_session_prepare(&self->base, cql, options, return_value TSRMLS_CC);
 }
 
 PHP_METHOD(DefaultSession, prepareAsync)
@@ -77,7 +77,7 @@ PHP_METHOD(DefaultSession, prepareAsync)
 
   self = PHP_CASSANDRA_GET_SESSION(getThis());
 
-  php_cassandra_session_prepare_async(&self->base, cql, options, return_value);
+  php_cassandra_session_prepare_async(&self->base, cql, options, return_value TSRMLS_CC);
 }
 
 PHP_METHOD(DefaultSession, close)
@@ -90,7 +90,7 @@ PHP_METHOD(DefaultSession, close)
     return;
   }
 
-  php_cassandra_session_close(&self->base, timeout, return_value);
+  php_cassandra_session_close(&self->base, timeout, return_value TSRMLS_CC);
 }
 
 PHP_METHOD(DefaultSession, closeAsync)
@@ -101,7 +101,7 @@ PHP_METHOD(DefaultSession, closeAsync)
     return;
   }
 
-  php_cassandra_session_close_async(&self->base, return_value);
+  php_cassandra_session_close_async(&self->base, return_value TSRMLS_CC);
 }
 
 PHP_METHOD(DefaultSession, schema)
@@ -111,7 +111,7 @@ PHP_METHOD(DefaultSession, schema)
   if (zend_parse_parameters_none() == FAILURE)
     return;
 
-  php_cassandra_session_schema(&self->base, return_value);
+  php_cassandra_session_schema(&self->base, return_value TSRMLS_CC);
 }
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_execute, 0, ZEND_RETURN_VALUE, 1)

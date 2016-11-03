@@ -15,13 +15,10 @@
  */
 
 #include "php_cassandra.h"
+#include "version.h"
 
 #include <php_ini.h>
 #include <ext/standard/info.h>
-
-#if CURRENT_CPP_DRIVER_VERSION < CPP_DRIVER_VERSION(2, 3, 0)
-#error C/C++ driver version 2.3.0 or greater required
-#endif
 
 static PHP_GINIT_FUNCTION(cassandra);
 static PHP_GSHUTDOWN_FUNCTION(cassandra);
@@ -71,12 +68,12 @@ PHP_INI_END()
 
 static PHP_GINIT_FUNCTION(cassandra)
 {
-  php_cassandra_ginit();
+  php_cassandra_ginit(TSRMLS_C);
 }
 
 static PHP_GSHUTDOWN_FUNCTION(cassandra)
 {
-  php_cassandra_gshutdown();
+  php_cassandra_gshutdown(TSRMLS_C);
 }
 
 PHP_MINIT_FUNCTION(cassandra)

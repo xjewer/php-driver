@@ -61,8 +61,6 @@ typedef int pid_t;
 #  error SPL must be enabled in order to build the driver
 #endif
 
-#include "version.h"
-
 /* Resources */
 #define PHP_CASSANDRA_CLUSTER_RES_NAME    "Cassandra Cluster"
 #define PHP_CASSANDRA_SESSION_RES_NAME    "Cassandra Session"
@@ -491,8 +489,8 @@ void throw_invalid_argument(zval *object,
 PHP_INI_MH(OnUpdateLogLevel);
 PHP_INI_MH(OnUpdateLog);
 
-void php_cassandra_ginit();
-void php_cassandra_gshutdown();
+void php_cassandra_ginit(TSRMLS_D);
+void php_cassandra_gshutdown(TSRMLS_D);
 
 int php_cassandra_minit(INIT_FUNC_ARGS);
 int php_cassandra_mshutdown(SHUTDOWN_FUNC_ARGS);

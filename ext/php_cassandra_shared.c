@@ -28,11 +28,8 @@
 #include "util/types.h"
 #include "util/ref.h"
 
-#define PHP_CASSANDRA_DEFAULT_LOG       "cassandra.log"
-#define PHP_CASSANDRA_DEFAULT_LOG_LEVEL "ERROR"
-
-#if CURRENT_CPP_DRIVER_VERSION < CPP_DRIVER_VERSION(2, 3, 0)
-#error C/C++ driver version 2.3.0 or greater required
+#if CURRENT_CPP_DRIVER_VERSION < CPP_DRIVER_VERSION(2, 5, 0)
+#error C/C++ driver version 2.5.0 or greater required
 #endif
 
 static uv_once_t log_once = UV_ONCE_INIT;
@@ -225,7 +222,7 @@ PHP_INI_MH(OnUpdateLog)
   return SUCCESS;
 }
 
-void php_cassandra_ginit()
+void php_cassandra_ginit(TSRMLS_D)
 {
   uv_once(&log_once, php_cassandra_log_initialize);
 
@@ -252,7 +249,7 @@ void php_cassandra_ginit()
   PHP5TO7_ZVAL_UNDEF(CASSANDRA_G(type_timeuuid));
 }
 
-void php_cassandra_gshutdown()
+void php_cassandra_gshutdown(TSRMLS_D)
 {
   if (CASSANDRA_G(uuid_gen)) {
     cass_uuid_gen_free(CASSANDRA_G(uuid_gen));

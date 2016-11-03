@@ -172,7 +172,7 @@ void php_cassandra_cluster_builder_generate_hash_key(cassandra_cluster_builder_b
 }
 
 CassCluster *php_cassandra_cluster_builder_get_cache(cassandra_cluster_builder_base *builder,
-                                                     const char *hash_key, int hash_key_len) {
+                                                     const char *hash_key, int hash_key_len TSRMLS_DC) {
   if (builder->persist) {
     php5to7_zend_resource_le *le;
 
@@ -188,7 +188,7 @@ CassCluster *php_cassandra_cluster_builder_get_cache(cassandra_cluster_builder_b
 
 void php_cassandra_cluster_builder_add_cache(cassandra_cluster_builder_base *builder,
                                              const char *hash_key, int hash_key_len,
-                                             CassCluster *cluster) {
+                                             CassCluster *cluster TSRMLS_DC) {
   if (builder->persist) {
     php5to7_zend_resource_le resource;
 
@@ -519,7 +519,7 @@ void php_cassandra_cluster_builder_properties(cassandra_cluster_builder_base *bu
 }
 
 void php_cassandra_cluster_builder_build(cassandra_cluster_builder_base *builder,
-                                         CassCluster *cluster) {
+                                         CassCluster *cluster TSRMLS_DC) {
   if (builder->load_balancing_policy == LOAD_BALANCING_ROUND_ROBIN) {
     cass_cluster_set_load_balance_round_robin(cluster);
   }

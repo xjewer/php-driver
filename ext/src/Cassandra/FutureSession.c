@@ -41,7 +41,7 @@ PHP_METHOD(FutureSession, get)
   object_init_ex(return_value, cassandra_default_session_ce);
   session = &PHP_CASSANDRA_GET_SESSION(return_value)->base;
 
-  php_cassandra_future_session_get(future, timeout, session);
+  php_cassandra_future_session_get(future, timeout, session TSRMLS_CC);
 
   PHP5TO7_ZVAL_COPY(PHP5TO7_ZVAL_MAYBE_P(future->default_session), return_value);
 }
@@ -141,7 +141,7 @@ void php_cassandra_future_session_destroy(cassandra_future_session_base *future)
 
 void php_cassandra_future_session_get(cassandra_future_session_base *future,
                                       zval *timeout,
-                                      cassandra_session_base *session)
+                                      cassandra_session_base *session TSRMLS_DC)
 {
   CassError rc = CASS_OK;
 

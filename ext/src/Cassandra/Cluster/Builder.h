@@ -7,11 +7,11 @@ void php_cassandra_cluster_builder_generate_hash_key(cassandra_cluster_builder_b
                                                      char **hash_key, int *hash_key_len);
 
 CassCluster *php_cassandra_cluster_builder_get_cache(cassandra_cluster_builder_base *builder,
-                                                     const char *hash_key, int hash_key_len);
+                                                     const char *hash_key, int hash_key_len TSRMLS_DC);
 
 void php_cassandra_cluster_builder_add_cache(cassandra_cluster_builder_base *builder,
                                              const char *hash_key, int hash_key_len,
-                                             CassCluster *cluster);
+                                             CassCluster *cluster TSRMLS_DC);
 
 void php_cassandra_cluster_builder_init(cassandra_cluster_builder_base *builder);
 
@@ -21,7 +21,7 @@ void php_cassandra_cluster_builder_properties(cassandra_cluster_builder_base *bu
                                               HashTable *props);
 
 void php_cassandra_cluster_builder_build(cassandra_cluster_builder_base *builder,
-                                         CassCluster *cluster);
+                                         CassCluster *cluster TSRMLS_DC);
 
 void php_cassandra_cluster_builder_with_default_consistency(cassandra_cluster_builder_base *builder,
                                                             INTERNAL_FUNCTION_PARAMETERS);

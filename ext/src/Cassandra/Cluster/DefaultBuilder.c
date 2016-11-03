@@ -49,15 +49,15 @@ PHP_METHOD(ClusterBuilder, build)
 
   cluster->cluster = php_cassandra_cluster_builder_get_cache(builder,
                                                                   cluster->hash_key,
-                                                                  cluster->hash_key_len);
+                                                                  cluster->hash_key_len TSRMLS_CC);
 
   if (!cluster->cluster) {
     cluster->cluster = cass_cluster_new();
-    php_cassandra_cluster_builder_build(builder, cluster->cluster);
+    php_cassandra_cluster_builder_build(builder, cluster->cluster TSRMLS_CC);
     php_cassandra_cluster_builder_add_cache(builder,
                                             cluster->hash_key,
                                             cluster->hash_key_len,
-                                            cluster->cluster);
+                                            cluster->cluster TSRMLS_CC);
   }
 }
 

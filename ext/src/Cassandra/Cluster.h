@@ -24,10 +24,10 @@ void php_cassandra_cluster_destroy(cassandra_cluster_base *cluster);
 void php_cassandra_cluster_connect(cassandra_cluster_base *cluster,
                                    char *keyspace, php5to7_size keyspace_len,
                                    zval *timeout,
-                                   cassandra_session_base *session);
+                                   cassandra_session_base *session TSRMLS_DC);
 
 void php_cassandra_cluster_connect_async(cassandra_cluster_base *cluster,
                                          char *keyspace, php5to7_size keyspace_len,
-                                         cassandra_future_session_base *future);
+                                         cassandra_future_session_base *future TSRMLS_DC);
 
 #endif /* PHP_CASSANDRA_CLUSTER_H */
