@@ -15,6 +15,7 @@
  */
 
 #include "php_cassandra.h"
+#include "php_cassandra_globals.h"
 #include "util/future.h"
 #include "util/ref.h"
 

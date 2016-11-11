@@ -15,6 +15,7 @@
  */
 
 #include "php_cassandra.h"
+#include "php_cassandra_globals.h"
 #include "util/consistency.h"
 
 #if PHP_MAJOR_VERSION >= 7

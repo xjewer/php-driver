@@ -20,8 +20,14 @@
 #include <php_ini.h>
 #include <ext/standard/info.h>
 
-static PHP_GINIT_FUNCTION(cassandra);
-static PHP_GSHUTDOWN_FUNCTION(cassandra);
+#if CURRENT_CPP_DRIVER_VERSION < CPP_DRIVER_VERSION(2, 5, 0)
+#error C/C++ driver version 2.5.0 or greater required
+#endif
+
+ZEND_DECLARE_MODULE_GLOBALS(php_driver)
+
+static PHP_GINIT_FUNCTION(php_driver);
+static PHP_GSHUTDOWN_FUNCTION(php_driver);
 
 const zend_function_entry cassandra_functions[] = {
   PHP_FE_END /* Must be the last line in cassandra_functions[] */
@@ -50,9 +56,9 @@ zend_module_entry cassandra_module_entry = {
 #if ZEND_MODULE_API_NO >= 20010901
   PHP_CASSANDRA_VERSION,
 #endif
-  PHP_MODULE_GLOBALS(cassandra),
-  PHP_GINIT(cassandra),
-  PHP_GSHUTDOWN(cassandra),
+  PHP_MODULE_GLOBALS(php_driver),
+  PHP_GINIT(php_driver),
+  PHP_GSHUTDOWN(php_driver),
   NULL,
   STANDARD_MODULE_PROPERTIES_EX
 };
@@ -66,14 +72,14 @@ PHP_INI_BEGIN()
   PHP_CASSANDRA_INI_ENTRY_LOG_LEVEL
 PHP_INI_END()
 
-static PHP_GINIT_FUNCTION(cassandra)
+static PHP_GINIT_FUNCTION(php_driver)
 {
   php_cassandra_ginit(TSRMLS_C);
 }
 
 static PHP_GSHUTDOWN_FUNCTION(cassandra)
 {
-  php_cassandra_gshutdown(TSRMLS_C);
+  php_cassandra_gshutdown(php_driver);
 }
 
 PHP_MINIT_FUNCTION(cassandra)

@@ -19,7 +19,9 @@
 
 #include <cassandra.h>
 
+#include "php_driver.h"
 #include "php_cassandra_shared.h"
+#include "version.h"
 
 extern zend_module_entry cassandra_module_entry;
 

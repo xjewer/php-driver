@@ -15,6 +15,7 @@
  */
 
 #include "php_cassandra.h"
+#include "php_cassandra_globals.h"
 
 #ifndef _WIN32
 #include <php_syslog.h>
@@ -28,20 +29,56 @@
 #include "util/types.h"
 #include "util/ref.h"
 
-#if CURRENT_CPP_DRIVER_VERSION < CPP_DRIVER_VERSION(2, 5, 0)
-#error C/C++ driver version 2.5.0 or greater required
-#endif
+/* Resources */
+#define PHP_CASSANDRA_CLUSTER_RES_NAME "Cassandra Cluster"
+#define PHP_CASSANDRA_SESSION_RES_NAME "Cassandra Session"
 
 static uv_once_t log_once = UV_ONCE_INIT;
 static char *log_location = NULL;
 static uv_rwlock_t log_lock;
 
-ZEND_DECLARE_MODULE_GLOBALS(cassandra)
+static int le_cassandra_cluster_res;
+int
+php_le_cassandra_cluster()
+{
+  return le_cassandra_cluster_res;
+}
+static void
+php_cassandra_cluster_dtor(php5to7_zend_resource rsrc TSRMLS_DC)
+{
+  CassCluster *cluster = (CassCluster*) rsrc->ptr;
+
+  if (cluster) {
+    cass_cluster_free(cluster);
+    CASSANDRA_G(persistent_clusters)--;
+    rsrc->ptr = NULL;
+  }
+}
+
+static int le_cassandra_session_res;
+int
+php_le_cassandra_session()
+{
+  return le_cassandra_session_res;
+}
+static void
+php_cassandra_session_dtor(php5to7_zend_resource rsrc TSRMLS_DC)
+{
+  cassandra_psession *psession = (cassandra_psession*) rsrc->ptr;
+
+  if (psession) {
+    cass_future_free(psession->future);
+    php_cassandra_del_peref(&psession->session, 1);
+    pefree(psession, 1);
+    CASSANDRA_G(persistent_sessions)--;
+    rsrc->ptr = NULL;
+  }
+}
 
 static void
 php_cassandra_log(const CassLogMessage *message, void *data);
 
-void
+static void
 php_cassandra_log_cleanup()
 {
   cass_log_cleanup();
@@ -130,41 +167,124 @@ php_cassandra_log(const CassLogMessage *message, void *data)
           PHP_EOL);
 }
 
-static int le_cassandra_cluster_res;
-int
-php_le_cassandra_cluster()
+zend_class_entry*
+exception_class(CassError rc)
 {
-  return le_cassandra_cluster_res;
-}
-static void
-php_cassandra_cluster_dtor(php5to7_zend_resource rsrc TSRMLS_DC)
-{
-  CassCluster *cluster = (CassCluster*) rsrc->ptr;
-
-  if (cluster) {
-    cass_cluster_free(cluster);
-    CASSANDRA_G(persistent_clusters)--;
-    rsrc->ptr = NULL;
+  switch (rc) {
+  case CASS_ERROR_LIB_BAD_PARAMS:
+  case CASS_ERROR_LIB_INDEX_OUT_OF_BOUNDS:
+  case CASS_ERROR_LIB_INVALID_ITEM_COUNT:
+  case CASS_ERROR_LIB_INVALID_VALUE_TYPE:
+  case CASS_ERROR_LIB_INVALID_STATEMENT_TYPE:
+  case CASS_ERROR_LIB_NAME_DOES_NOT_EXIST:
+  case CASS_ERROR_LIB_NULL_VALUE:
+  case CASS_ERROR_SSL_INVALID_CERT:
+  case CASS_ERROR_SSL_INVALID_PRIVATE_KEY:
+  case CASS_ERROR_SSL_NO_PEER_CERT:
+  case CASS_ERROR_SSL_INVALID_PEER_CERT:
+  case CASS_ERROR_SSL_IDENTITY_MISMATCH:
+    return cassandra_invalid_argument_exception_ce;
+  case CASS_ERROR_LIB_NO_STREAMS:
+  case CASS_ERROR_LIB_UNABLE_TO_INIT:
+  case CASS_ERROR_LIB_MESSAGE_ENCODE:
+  case CASS_ERROR_LIB_HOST_RESOLUTION:
+  case CASS_ERROR_LIB_UNEXPECTED_RESPONSE:
+  case CASS_ERROR_LIB_REQUEST_QUEUE_FULL:
+  case CASS_ERROR_LIB_NO_AVAILABLE_IO_THREAD:
+  case CASS_ERROR_LIB_WRITE_ERROR:
+  case CASS_ERROR_LIB_NO_HOSTS_AVAILABLE:
+  case CASS_ERROR_LIB_UNABLE_TO_SET_KEYSPACE:
+  case CASS_ERROR_LIB_UNABLE_TO_DETERMINE_PROTOCOL:
+  case CASS_ERROR_LIB_UNABLE_TO_CONNECT:
+  case CASS_ERROR_LIB_UNABLE_TO_CLOSE:
+    return cassandra_runtime_exception_ce;
+  case CASS_ERROR_LIB_REQUEST_TIMED_OUT:
+    return cassandra_timeout_exception_ce;
+  case CASS_ERROR_LIB_CALLBACK_ALREADY_SET:
+  case CASS_ERROR_LIB_NOT_IMPLEMENTED:
+    return cassandra_logic_exception_ce;
+  case CASS_ERROR_SERVER_SERVER_ERROR:
+    return cassandra_server_exception_ce;
+  case CASS_ERROR_SERVER_PROTOCOL_ERROR:
+    return cassandra_protocol_exception_ce;
+  case CASS_ERROR_SERVER_BAD_CREDENTIALS:
+    return cassandra_authentication_exception_ce;
+  case CASS_ERROR_SERVER_UNAVAILABLE:
+    return cassandra_unavailable_exception_ce;
+  case CASS_ERROR_SERVER_OVERLOADED:
+    return cassandra_overloaded_exception_ce;
+  case CASS_ERROR_SERVER_IS_BOOTSTRAPPING:
+    return cassandra_is_bootstrapping_exception_ce;
+  case CASS_ERROR_SERVER_TRUNCATE_ERROR:
+    return cassandra_truncate_exception_ce;
+  case CASS_ERROR_SERVER_WRITE_TIMEOUT:
+    return cassandra_write_timeout_exception_ce;
+  case CASS_ERROR_SERVER_READ_TIMEOUT:
+    return cassandra_read_timeout_exception_ce;
+  case CASS_ERROR_SERVER_SYNTAX_ERROR:
+    return cassandra_invalid_syntax_exception_ce;
+  case CASS_ERROR_SERVER_UNAUTHORIZED:
+    return cassandra_unauthorized_exception_ce;
+  case CASS_ERROR_SERVER_INVALID_QUERY:
+    return cassandra_invalid_query_exception_ce;
+  case CASS_ERROR_SERVER_CONFIG_ERROR:
+    return cassandra_configuration_exception_ce;
+  case CASS_ERROR_SERVER_ALREADY_EXISTS:
+    return cassandra_already_exists_exception_ce;
+  case CASS_ERROR_SERVER_UNPREPARED:
+    return cassandra_unprepared_exception_ce;
+  default:
+    return cassandra_runtime_exception_ce;
   }
 }
 
-static int le_cassandra_session_res;
-int
-php_le_cassandra_session()
+void
+throw_invalid_argument(zval *object,
+                       const char *object_name,
+                       const char *expected_type TSRMLS_DC)
 {
-  return le_cassandra_session_res;
-}
-static void
-php_cassandra_session_dtor(php5to7_zend_resource rsrc TSRMLS_DC)
-{
-  cassandra_psession *psession = (cassandra_psession*) rsrc->ptr;
+  if (Z_TYPE_P(object) == IS_OBJECT) {
+#if ZEND_MODULE_API_NO >= 20100525
+    const char* cls_name = NULL;
+#else
+    char* cls_name = NULL;
+#endif
 
-  if (psession) {
-    cass_future_free(psession->future);
-    php_cassandra_del_peref(&psession->session, 1);
-    pefree(psession, 1);
-    CASSANDRA_G(persistent_sessions)--;
-    rsrc->ptr = NULL;
+#if PHP_MAJOR_VERSION >= 7
+    size_t cls_len;
+#else
+    zend_uint cls_len;
+#endif
+
+#if PHP_MAJOR_VERSION >= 7
+    zend_string* str  = Z_OBJ_HANDLER_P(object, get_class_name)(Z_OBJ_P(object) TSRMLS_CC);
+    cls_name = str->val;
+    cls_len = str->len;
+#else
+    Z_OBJ_HANDLER_P(object, get_class_name)(object, &cls_name, &cls_len, 0 TSRMLS_CC);
+#endif
+    if (cls_name) {
+      zend_throw_exception_ex(cassandra_invalid_argument_exception_ce, 0 TSRMLS_CC,
+                              "%s must be %s, an instance of %.*s given",
+                              object_name, expected_type, cls_len, cls_name);
+#if PHP_MAJOR_VERSION >= 7
+      zend_string_release(str);
+#else
+      efree((void*) cls_name);
+#endif
+    } else {
+      zend_throw_exception_ex(cassandra_invalid_argument_exception_ce, 0 TSRMLS_CC,
+                              "%s must be %s, an instance of Unknown Class given",
+                              object_name, expected_type);
+    }
+  } else if (Z_TYPE_P(object) == IS_STRING) {
+    zend_throw_exception_ex(cassandra_invalid_argument_exception_ce, 0 TSRMLS_CC,
+                            "%s must be %s, '%Z' given",
+                            object_name, expected_type, object);
+  } else {
+    zend_throw_exception_ex(cassandra_invalid_argument_exception_ce, 0 TSRMLS_CC,
+                            "%s must be %s, %Z given",
+                            object_name, expected_type, object);
   }
 }
 
@@ -226,33 +346,33 @@ void php_cassandra_ginit(TSRMLS_D)
 {
   uv_once(&log_once, php_cassandra_log_initialize);
 
-  CASSANDRA_G(uuid_gen)            = NULL;
-  CASSANDRA_G(uuid_gen_pid)        = 0;
-  CASSANDRA_G(persistent_clusters) = 0;
-  CASSANDRA_G(persistent_sessions) = 0;
-  PHP5TO7_ZVAL_UNDEF(CASSANDRA_G(type_varchar));
-  PHP5TO7_ZVAL_UNDEF(CASSANDRA_G(type_text));
-  PHP5TO7_ZVAL_UNDEF(CASSANDRA_G(type_blob));
-  PHP5TO7_ZVAL_UNDEF(CASSANDRA_G(type_ascii));
-  PHP5TO7_ZVAL_UNDEF(CASSANDRA_G(type_bigint));
-  PHP5TO7_ZVAL_UNDEF(CASSANDRA_G(type_smallint));
-  PHP5TO7_ZVAL_UNDEF(CASSANDRA_G(type_counter));
-  PHP5TO7_ZVAL_UNDEF(CASSANDRA_G(type_int));
-  PHP5TO7_ZVAL_UNDEF(CASSANDRA_G(type_varint));
-  PHP5TO7_ZVAL_UNDEF(CASSANDRA_G(type_boolean));
-  PHP5TO7_ZVAL_UNDEF(CASSANDRA_G(type_decimal));
-  PHP5TO7_ZVAL_UNDEF(CASSANDRA_G(type_double));
-  PHP5TO7_ZVAL_UNDEF(CASSANDRA_G(type_float));
-  PHP5TO7_ZVAL_UNDEF(CASSANDRA_G(type_inet));
-  PHP5TO7_ZVAL_UNDEF(CASSANDRA_G(type_timestamp));
-  PHP5TO7_ZVAL_UNDEF(CASSANDRA_G(type_uuid));
-  PHP5TO7_ZVAL_UNDEF(CASSANDRA_G(type_timeuuid));
+  PHP_DRIVER_G(uuid_gen)            = NULL;
+  PHP_DRIVER_G(uuid_gen_pid)        = 0;
+  PHP_DRIVER_G(persistent_clusters) = 0;
+  PHP_DRIVER_G(persistent_sessions) = 0;
+  PHP5TO7_ZVAL_UNDEF(PHP_DRIVER_G(type_varchar));
+  PHP5TO7_ZVAL_UNDEF(PHP_DRIVER_G(type_text));
+  PHP5TO7_ZVAL_UNDEF(PHP_DRIVER_G(type_blob));
+  PHP5TO7_ZVAL_UNDEF(PHP_DRIVER_G(type_ascii));
+  PHP5TO7_ZVAL_UNDEF(PHP_DRIVER_G(type_bigint));
+  PHP5TO7_ZVAL_UNDEF(PHP_DRIVER_G(type_smallint));
+  PHP5TO7_ZVAL_UNDEF(PHP_DRIVER_G(type_counter));
+  PHP5TO7_ZVAL_UNDEF(PHP_DRIVER_G(type_int));
+  PHP5TO7_ZVAL_UNDEF(PHP_DRIVER_G(type_varint));
+  PHP5TO7_ZVAL_UNDEF(PHP_DRIVER_G(type_boolean));
+  PHP5TO7_ZVAL_UNDEF(PHP_DRIVER_G(type_decimal));
+  PHP5TO7_ZVAL_UNDEF(PHP_DRIVER_G(type_double));
+  PHP5TO7_ZVAL_UNDEF(PHP_DRIVER_G(type_float));
+  PHP5TO7_ZVAL_UNDEF(PHP_DRIVER_G(type_inet));
+  PHP5TO7_ZVAL_UNDEF(PHP_DRIVER_G(type_timestamp));
+  PHP5TO7_ZVAL_UNDEF(PHP_DRIVER_G(type_uuid));
+  PHP5TO7_ZVAL_UNDEF(PHP_DRIVER_G(type_timeuuid));
 }
 
 void php_cassandra_gshutdown(TSRMLS_D)
 {
-  if (CASSANDRA_G(uuid_gen)) {
-    cass_uuid_gen_free(CASSANDRA_G(uuid_gen));
+  if (PHP_DRIVER_G(uuid_gen)) {
+    cass_uuid_gen_free(PHP_DRIVER_G(uuid_gen));
   }
   php_cassandra_log_cleanup();
 }
@@ -403,125 +523,4 @@ int php_cassandra_rshutdown(SHUTDOWN_FUNC_ARGS)
 #undef XX_SCALAR
 
   return SUCCESS;
-}
-
-zend_class_entry*
-exception_class(CassError rc)
-{
-  switch (rc) {
-  case CASS_ERROR_LIB_BAD_PARAMS:
-  case CASS_ERROR_LIB_INDEX_OUT_OF_BOUNDS:
-  case CASS_ERROR_LIB_INVALID_ITEM_COUNT:
-  case CASS_ERROR_LIB_INVALID_VALUE_TYPE:
-  case CASS_ERROR_LIB_INVALID_STATEMENT_TYPE:
-  case CASS_ERROR_LIB_NAME_DOES_NOT_EXIST:
-  case CASS_ERROR_LIB_NULL_VALUE:
-  case CASS_ERROR_SSL_INVALID_CERT:
-  case CASS_ERROR_SSL_INVALID_PRIVATE_KEY:
-  case CASS_ERROR_SSL_NO_PEER_CERT:
-  case CASS_ERROR_SSL_INVALID_PEER_CERT:
-  case CASS_ERROR_SSL_IDENTITY_MISMATCH:
-    return cassandra_invalid_argument_exception_ce;
-  case CASS_ERROR_LIB_NO_STREAMS:
-  case CASS_ERROR_LIB_UNABLE_TO_INIT:
-  case CASS_ERROR_LIB_MESSAGE_ENCODE:
-  case CASS_ERROR_LIB_HOST_RESOLUTION:
-  case CASS_ERROR_LIB_UNEXPECTED_RESPONSE:
-  case CASS_ERROR_LIB_REQUEST_QUEUE_FULL:
-  case CASS_ERROR_LIB_NO_AVAILABLE_IO_THREAD:
-  case CASS_ERROR_LIB_WRITE_ERROR:
-  case CASS_ERROR_LIB_NO_HOSTS_AVAILABLE:
-  case CASS_ERROR_LIB_UNABLE_TO_SET_KEYSPACE:
-  case CASS_ERROR_LIB_UNABLE_TO_DETERMINE_PROTOCOL:
-  case CASS_ERROR_LIB_UNABLE_TO_CONNECT:
-  case CASS_ERROR_LIB_UNABLE_TO_CLOSE:
-    return cassandra_runtime_exception_ce;
-  case CASS_ERROR_LIB_REQUEST_TIMED_OUT:
-    return cassandra_timeout_exception_ce;
-  case CASS_ERROR_LIB_CALLBACK_ALREADY_SET:
-  case CASS_ERROR_LIB_NOT_IMPLEMENTED:
-    return cassandra_logic_exception_ce;
-  case CASS_ERROR_SERVER_SERVER_ERROR:
-    return cassandra_server_exception_ce;
-  case CASS_ERROR_SERVER_PROTOCOL_ERROR:
-    return cassandra_protocol_exception_ce;
-  case CASS_ERROR_SERVER_BAD_CREDENTIALS:
-    return cassandra_authentication_exception_ce;
-  case CASS_ERROR_SERVER_UNAVAILABLE:
-    return cassandra_unavailable_exception_ce;
-  case CASS_ERROR_SERVER_OVERLOADED:
-    return cassandra_overloaded_exception_ce;
-  case CASS_ERROR_SERVER_IS_BOOTSTRAPPING:
-    return cassandra_is_bootstrapping_exception_ce;
-  case CASS_ERROR_SERVER_TRUNCATE_ERROR:
-    return cassandra_truncate_exception_ce;
-  case CASS_ERROR_SERVER_WRITE_TIMEOUT:
-    return cassandra_write_timeout_exception_ce;
-  case CASS_ERROR_SERVER_READ_TIMEOUT:
-    return cassandra_read_timeout_exception_ce;
-  case CASS_ERROR_SERVER_SYNTAX_ERROR:
-    return cassandra_invalid_syntax_exception_ce;
-  case CASS_ERROR_SERVER_UNAUTHORIZED:
-    return cassandra_unauthorized_exception_ce;
-  case CASS_ERROR_SERVER_INVALID_QUERY:
-    return cassandra_invalid_query_exception_ce;
-  case CASS_ERROR_SERVER_CONFIG_ERROR:
-    return cassandra_configuration_exception_ce;
-  case CASS_ERROR_SERVER_ALREADY_EXISTS:
-    return cassandra_already_exists_exception_ce;
-  case CASS_ERROR_SERVER_UNPREPARED:
-    return cassandra_unprepared_exception_ce;
-  default:
-    return cassandra_runtime_exception_ce;
-  }
-}
-
-void
-throw_invalid_argument(zval *object,
-                       const char *object_name,
-                       const char *expected_type TSRMLS_DC)
-{
-  if (Z_TYPE_P(object) == IS_OBJECT) {
-#if ZEND_MODULE_API_NO >= 20100525
-    const char* cls_name = NULL;
-#else
-    char* cls_name = NULL;
-#endif
-
-#if PHP_MAJOR_VERSION >= 7
-    size_t cls_len;
-#else
-    zend_uint cls_len;
-#endif
-
-#if PHP_MAJOR_VERSION >= 7
-    zend_string* str  = Z_OBJ_HANDLER_P(object, get_class_name)(Z_OBJ_P(object) TSRMLS_CC);
-    cls_name = str->val;
-    cls_len = str->len;
-#else
-    Z_OBJ_HANDLER_P(object, get_class_name)(object, &cls_name, &cls_len, 0 TSRMLS_CC);
-#endif
-    if (cls_name) {
-      zend_throw_exception_ex(cassandra_invalid_argument_exception_ce, 0 TSRMLS_CC,
-                              "%s must be %s, an instance of %.*s given",
-                              object_name, expected_type, cls_len, cls_name);
-#if PHP_MAJOR_VERSION >= 7
-      zend_string_release(str);
-#else
-      efree((void*) cls_name);
-#endif
-    } else {
-      zend_throw_exception_ex(cassandra_invalid_argument_exception_ce, 0 TSRMLS_CC,
-                              "%s must be %s, an instance of Unknown Class given",
-                              object_name, expected_type);
-    }
-  } else if (Z_TYPE_P(object) == IS_STRING) {
-    zend_throw_exception_ex(cassandra_invalid_argument_exception_ce, 0 TSRMLS_CC,
-                            "%s must be %s, '%Z' given",
-                            object_name, expected_type, object);
-  } else {
-    zend_throw_exception_ex(cassandra_invalid_argument_exception_ce, 0 TSRMLS_CC,
-                            "%s must be %s, %Z given",
-                            object_name, expected_type, object);
-  }
 }
