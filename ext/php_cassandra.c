@@ -15,6 +15,7 @@
  */
 
 #include "php_cassandra.h"
+#include "php_cassandra_globals.h"
 #include "version.h"
 
 #include <php_ini.h>
@@ -77,9 +78,9 @@ static PHP_GINIT_FUNCTION(php_driver)
   php_cassandra_ginit(TSRMLS_C);
 }
 
-static PHP_GSHUTDOWN_FUNCTION(cassandra)
+static PHP_GSHUTDOWN_FUNCTION(php_driver)
 {
-  php_cassandra_gshutdown(php_driver);
+  php_cassandra_gshutdown(TSRMLS_C);
 }
 
 PHP_MINIT_FUNCTION(cassandra)
