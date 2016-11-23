@@ -36,24 +36,30 @@ PHP_METHOD(ClusterBuilder, build)
   object_init_ex(return_value, cassandra_default_cluster_ce);
   cluster = &PHP_CASSANDRA_GET_CLUSTER(return_value)->base;
 
-  cluster->persist = builder->persist;
+  cluster->persist             = builder->persist;
   cluster->default_consistency = builder->default_consistency;
-  cluster->default_page_size = builder->default_page_size;
+  cluster->default_page_size   = builder->default_page_size;
 
   PHP5TO7_ZVAL_COPY(PHP5TO7_ZVAL_MAYBE_P(cluster->default_timeout),
                     PHP5TO7_ZVAL_MAYBE_P(builder->default_timeout));
 
-  php_cassandra_cluster_builder_generate_hash_key(builder,
-                                                  &cluster->hash_key,
-                                                  &cluster->hash_key_len);
+  if (builder->persist) {
+    php_cassandra_cluster_builder_generate_hash_key(builder,
+                                                    &cluster->hash_key,
+                                                    &cluster->hash_key_len);
 
-  cluster->cluster = php_cassandra_cluster_builder_get_cache(builder,
-                                                                  cluster->hash_key,
-                                                                  cluster->hash_key_len TSRMLS_CC);
+    cluster->cluster = php_cassandra_cluster_builder_get_cache(builder,
+                                                               cluster->hash_key,
+                                                               cluster->hash_key_len TSRMLS_CC);
+    if (cluster->cluster) {
+      return;
+    }
+  }
 
-  if (!cluster->cluster) {
-    cluster->cluster = cass_cluster_new();
-    php_cassandra_cluster_builder_build(builder, cluster->cluster TSRMLS_CC);
+  cluster->cluster = cass_cluster_new();
+  php_cassandra_cluster_builder_build(builder, cluster->cluster TSRMLS_CC);
+
+  if (builder->persist) {
     php_cassandra_cluster_builder_add_cache(builder,
                                             cluster->hash_key,
                                             cluster->hash_key_len,
