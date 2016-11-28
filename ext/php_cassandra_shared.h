@@ -75,4 +75,23 @@ int php_cassandra_mshutdown(SHUTDOWN_FUNC_ARGS);
 int php_cassandra_rinit(INIT_FUNC_ARGS);
 int php_cassandra_rshutdown(SHUTDOWN_FUNC_ARGS);
 
+typedef int (*cassandra_custom_marshal_bind_by_index_func)(CassStatement *statement, size_t index, zval *value TSRMLS_DC);
+typedef int (*cassandra_custom_marshal_bind_by_name_func)(CassStatement *statement, const char *name, zval *value TSRMLS_DC);
+typedef int (*cassandra_custom_marshal_get_result_func)(const CassValue *value, php5to7_zval *out TSRMLS_DC);
+
+typedef struct {
+  cassandra_custom_marshal_bind_by_index_func bind_by_index;
+  cassandra_custom_marshal_bind_by_name_func bind_by_name;
+  cassandra_custom_marshal_get_result_func get_result;
+} cassandra_custom_marshal;
+
+void php_cassandra_custom_marshal_add(const char* class_name,
+                                      cassandra_custom_marshal_bind_by_index_func bind_by_index,
+                                      cassandra_custom_marshal_bind_by_name_func bind_by_name,
+                                      cassandra_custom_marshal_get_result_func get_result TSRMLS_DC);
+
+cassandra_custom_marshal *php_cassandra_custom_marshal_get(const char* class_name TSRMLS_DC);
+cassandra_custom_marshal *php_cassandra_custom_marshal_get_n(const char* class_name,
+                                                             php5to7_size class_name_len TSRMLS_DC);
+
 #endif /* PHP_CASSANDRA_SHARED_H */

@@ -53,6 +53,7 @@ php_cassandra_value(const CassValue* value, const CassDataType* data_type, php5t
   cassandra_user_type_value *user_type_value = NULL;
   ulong index;
 
+  cassandra_custom_marshal *marshal;
   CassValueType type = cass_data_type_type(data_type);
   const CassDataType* primary_type;
   const CassDataType* secondary_type;
@@ -65,6 +66,19 @@ php_cassandra_value(const CassValue* value, const CassDataType* data_type, php5t
   }
 
   switch (type) {
+  case CASS_VALUE_TYPE_CUSTOM:
+    ASSERT_SUCCESS_BLOCK(cass_data_type_class_name(cass_value_data_type(value), &v_string, &v_string_len),
+      zval_ptr_dtor(out);
+      return FAILURE;
+    );
+    marshal = php_cassandra_custom_marshal_get_n(v_string, v_string_len TSRMLS_CC);
+    if (!marshal ||
+        !marshal->get_result ||
+        marshal->get_result(value, out TSRMLS_CC) == FAILURE) {
+      zval_ptr_dtor(out);
+      return FAILURE;
+    }
+    break;
   case CASS_VALUE_TYPE_ASCII:
   case CASS_VALUE_TYPE_TEXT:
   case CASS_VALUE_TYPE_VARCHAR:

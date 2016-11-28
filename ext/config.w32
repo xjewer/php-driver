@@ -93,6 +93,7 @@ if (PHP_CASSANDRA != "no") {
               "Cluster.c " +
               "Collection.c " +
               "Column.c " +
+              "Custom.c " +
               "Date.c " +
               "Decimal.c " +
               "DefaultAggregate.c " +

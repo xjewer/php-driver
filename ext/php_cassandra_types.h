@@ -508,6 +508,7 @@ extern PHP_DRIVER_API zend_class_entry *cassandra_uuid_interface_ce;
 extern PHP_DRIVER_API zend_class_entry *cassandra_uuid_ce;
 extern PHP_DRIVER_API zend_class_entry *cassandra_timeuuid_ce;
 extern PHP_DRIVER_API zend_class_entry *cassandra_varint_ce;
+extern PHP_DRIVER_API zend_class_entry *cassandra_custom_ce;
 
 extern PHP_DRIVER_API zend_class_entry *cassandra_set_ce;
 extern PHP_DRIVER_API zend_class_entry *cassandra_map_ce;
@@ -564,6 +565,7 @@ void cassandra_define_UuidInterface(TSRMLS_D);
 void cassandra_define_Uuid(TSRMLS_D);
 void cassandra_define_Timeuuid(TSRMLS_D);
 void cassandra_define_Varint(TSRMLS_D);
+void cassandra_define_Custom(TSRMLS_D);
 
 /* Classes */
 extern PHP_DRIVER_API zend_class_entry *cassandra_ce;

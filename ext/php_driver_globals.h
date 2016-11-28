@@ -32,6 +32,7 @@ ZEND_BEGIN_MODULE_GLOBALS(php_driver)
   php5to7_zval  type_timeuuid;
   php5to7_zval  type_smallint;
   php5to7_zval  type_tinyint;
+  HashTable     custom_marshallers;
   PHP_DRIVER_EXTRA_MODULE_GLOBALS /* Use this to add extra global variables */
 ZEND_END_MODULE_GLOBALS(php_driver)
 

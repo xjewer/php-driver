@@ -231,6 +231,27 @@ bind_argument_by_index(CassStatement *statement, size_t index, zval *value TSRML
       cass_user_type_free(ut);
       CHECK_RESULT(rc);
     }
+
+    if (instanceof_function(Z_OBJCE_P(value), cassandra_custom_ce TSRMLS_CC)) {
+      php5to7_zval retval;
+      cassandra_type *type;
+      cassandra_custom_marshal *marshal;
+      zend_call_method_with_0_params(PHP5TO7_ZVAL_MAYBE_ADDR_OF(value),
+                                     cassandra_custom_ce,
+                                     NULL,
+                                     "type",
+                                     &retval);
+      type = PHP_CASSANDRA_GET_TYPE(PHP5TO7_ZVAL_MAYBE_P(retval));
+      if (type->type != CASS_VALUE_TYPE_CUSTOM) {
+        return FAILURE;
+      }
+      marshal = php_cassandra_custom_marshal_get(type->name TSRMLS_CC);
+      if (!marshal ||
+          !marshal->bind_by_index ||
+          marshal->bind_by_index(statement, index, value TSRMLS_CC) == FAILURE) {
+        return FAILURE;
+      }
+    }
   }
 
   return FAILURE;
@@ -386,6 +407,27 @@ bind_argument_by_name(CassStatement *statement, const char *name,
       rc = cass_statement_bind_user_type_by_name(statement, name, ut);
       cass_user_type_free(ut);
       CHECK_RESULT(rc);
+    }
+
+    if (instanceof_function(Z_OBJCE_P(value), cassandra_custom_ce TSRMLS_CC)) {
+      php5to7_zval retval;
+      cassandra_type *type;
+      cassandra_custom_marshal *marshal;
+      zend_call_method_with_0_params(PHP5TO7_ZVAL_MAYBE_ADDR_OF(value),
+                                     cassandra_custom_ce,
+                                     NULL,
+                                     "type",
+                                     &retval);
+      type = PHP_CASSANDRA_GET_TYPE(PHP5TO7_ZVAL_MAYBE_P(retval));
+      if (type->type != CASS_VALUE_TYPE_CUSTOM) {
+        return FAILURE;
+      }
+      marshal = php_cassandra_custom_marshal_get(type->name TSRMLS_CC);
+      if (!marshal ||
+          !marshal->bind_by_name ||
+          marshal->bind_by_name(statement, name, value TSRMLS_CC) == FAILURE) {
+        return FAILURE;
+      }
     }
   }
 

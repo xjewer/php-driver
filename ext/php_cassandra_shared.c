@@ -37,6 +37,20 @@ static uv_once_t log_once = UV_ONCE_INIT;
 static char *log_location = NULL;
 static uv_rwlock_t log_lock;
 
+#if PHP_MAJOR_VERSION >= 7
+static void
+free_custom_marshal(zval *ptr)
+{
+  pefree(Z_PTR_P(ptr), 1);
+}
+#else
+static void
+free_custom_marshal(void *ptr)
+{
+  pefree(*(cassandra_custom_marshal **)(ptr), 1);
+}
+#endif
+
 static int le_cassandra_cluster_res;
 int
 php_le_cassandra_cluster()
@@ -367,6 +381,7 @@ void php_cassandra_ginit(TSRMLS_D)
   PHP5TO7_ZVAL_UNDEF(PHP_DRIVER_G(type_timestamp));
   PHP5TO7_ZVAL_UNDEF(PHP_DRIVER_G(type_uuid));
   PHP5TO7_ZVAL_UNDEF(PHP_DRIVER_G(type_timeuuid));
+  zend_hash_init(&PHP_DRIVER_G(custom_marshallers), 0, NULL, free_custom_marshal, 1);
 }
 
 void php_cassandra_gshutdown(TSRMLS_D)
@@ -375,6 +390,7 @@ void php_cassandra_gshutdown(TSRMLS_D)
     cass_uuid_gen_free(PHP_DRIVER_G(uuid_gen));
   }
   php_cassandra_log_cleanup();
+  zend_hash_destroy(&PHP_DRIVER_G(custom_marshallers));
 }
 
 int php_cassandra_minit(INIT_FUNC_ARGS)
@@ -430,6 +446,7 @@ int php_cassandra_minit(INIT_FUNC_ARGS)
   cassandra_define_Timeuuid(TSRMLS_C);
   cassandra_define_Uuid(TSRMLS_C);
   cassandra_define_Varint(TSRMLS_C);
+  cassandra_define_Custom(TSRMLS_C);
 
   cassandra_define_Set(TSRMLS_C);
   cassandra_define_Map(TSRMLS_C);
@@ -523,4 +540,55 @@ int php_cassandra_rshutdown(SHUTDOWN_FUNC_ARGS)
 #undef XX_SCALAR
 
   return SUCCESS;
+}
+
+void php_cassandra_custom_marshal_add(const char* class_name,
+                                         cassandra_custom_marshal_bind_by_index_func bind_by_index,
+                                         cassandra_custom_marshal_bind_by_name_func bind_by_name,
+                                         cassandra_custom_marshal_get_result_func get_result TSRMLS_DC)
+{
+  cassandra_custom_marshal *marshal = pemalloc(sizeof(cassandra_custom_marshal), 1);
+
+  marshal->bind_by_index  = bind_by_index;
+  marshal->bind_by_name  = bind_by_name;
+  marshal->get_result = get_result;
+
+#if PHP_MAJOR_VERSION >= 7
+  zval value;
+  ZVAL_PTR(&value, marshal);
+  zend_hash_str_add(&PHP_DRIVER_G(custom_marshallers),
+                    class_name, strlen(class_name),
+                    &value);
+#else
+  zend_hash_add(&PHP_DRIVER_G(custom_marshallers),
+                class_name, strlen(class_name) + 1,
+                (void **)&marshal, sizeof(cassandra_custom_marshal *),
+                NULL);
+#endif
+}
+
+cassandra_custom_marshal *php_cassandra_custom_marshal_get(const char* class_name TSRMLS_DC)
+{
+  return php_cassandra_custom_marshal_get_n(class_name, strlen(class_name) TSRMLS_CC);
+}
+
+cassandra_custom_marshal *php_cassandra_custom_marshal_get_n(const char* class_name,
+                                                                php5to7_size class_name_len TSRMLS_DC)
+{
+  cassandra_custom_marshal *marshal = NULL;
+#if PHP_MAJOR_VERSION >= 7
+  zval *value = zend_hash_str_find(&PHP_DRIVER_G(custom_marshallers),
+                                   class_name, class_name_len);
+  if (value) {
+    marshal = Z_PTR_P(value);
+  }
+#else
+  void *value;
+  if (zend_hash_find(&PHP_DRIVER_G(custom_marshallers),
+                     class_name, class_name_len + 1,
+                     &value) == SUCCESS) {
+    marshal = *(cassandra_custom_marshal **)value;
+  }
+#endif
+  return marshal;
 }

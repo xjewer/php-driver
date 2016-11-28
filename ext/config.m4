@@ -32,6 +32,7 @@ if test "$PHP_CASSANDRA" != "no"; then
     src/Cassandra/Cluster/DefaultBuilder.c \
     src/Cassandra/Collection.c \
     src/Cassandra/Column.c \
+    src/Cassandra/Custom.c \
     src/Cassandra/Date.c \
     src/Cassandra/Decimal.c \
     src/Cassandra/DefaultAggregate.c \
