@@ -823,7 +823,7 @@ php_cassandra_type_custom(char *name TSRMLS_DC)
   PHP5TO7_ZVAL_MAYBE_MAKE(ztype);
   object_init_ex(PHP5TO7_ZVAL_MAYBE_P(ztype), cassandra_type_custom_ce);
   custom = PHP_CASSANDRA_GET_TYPE(PHP5TO7_ZVAL_MAYBE_P(ztype));
-  custom->name = name;
+  custom->name = estrdup(name);
 
   return ztype;
 }

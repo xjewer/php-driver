@@ -543,9 +543,9 @@ int php_cassandra_rshutdown(SHUTDOWN_FUNC_ARGS)
 }
 
 void php_cassandra_custom_marshal_add(const char* class_name,
-                                         cassandra_custom_marshal_bind_by_index_func bind_by_index,
-                                         cassandra_custom_marshal_bind_by_name_func bind_by_name,
-                                         cassandra_custom_marshal_get_result_func get_result TSRMLS_DC)
+                                      cassandra_custom_marshal_bind_by_index_func bind_by_index,
+                                      cassandra_custom_marshal_bind_by_name_func bind_by_name,
+                                      cassandra_custom_marshal_get_result_func get_result TSRMLS_DC)
 {
   cassandra_custom_marshal *marshal = pemalloc(sizeof(cassandra_custom_marshal), 1);
 
@@ -573,7 +573,7 @@ cassandra_custom_marshal *php_cassandra_custom_marshal_get(const char* class_nam
 }
 
 cassandra_custom_marshal *php_cassandra_custom_marshal_get_n(const char* class_name,
-                                                                php5to7_size class_name_len TSRMLS_DC)
+                                                             php5to7_size class_name_len TSRMLS_DC)
 {
   cassandra_custom_marshal *marshal = NULL;
 #if PHP_MAJOR_VERSION >= 7
