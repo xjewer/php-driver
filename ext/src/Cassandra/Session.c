@@ -237,7 +237,7 @@ bind_argument_by_index(CassStatement *statement, size_t index, zval *value TSRML
       cassandra_type *type;
       cassandra_custom_marshal *marshal;
       zend_call_method_with_0_params(PHP5TO7_ZVAL_MAYBE_ADDR_OF(value),
-                                     cassandra_custom_ce,
+                                     Z_OBJCE_P(value),
                                      NULL,
                                      "type",
                                      &retval);
@@ -414,7 +414,7 @@ bind_argument_by_name(CassStatement *statement, const char *name,
       cassandra_type *type;
       cassandra_custom_marshal *marshal;
       zend_call_method_with_0_params(PHP5TO7_ZVAL_MAYBE_ADDR_OF(value),
-                                     cassandra_custom_ce,
+                                     Z_OBJCE_P(value),
                                      NULL,
                                      "type",
                                      &retval);
