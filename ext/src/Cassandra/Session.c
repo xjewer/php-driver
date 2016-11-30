@@ -251,6 +251,7 @@ bind_argument_by_index(CassStatement *statement, size_t index, zval *value TSRML
           marshal->bind_by_index(statement, index, value TSRMLS_CC) == FAILURE) {
         return FAILURE;
       }
+      return SUCCESS;
     }
   }
 
@@ -428,6 +429,7 @@ bind_argument_by_name(CassStatement *statement, const char *name,
           marshal->bind_by_name(statement, name, value TSRMLS_CC) == FAILURE) {
         return FAILURE;
       }
+      return SUCCESS;
     }
   }
 
