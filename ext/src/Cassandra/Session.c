@@ -67,19 +67,62 @@ void cassandra_define_Session(TSRMLS_D)
   return SUCCESS; \
 }
 
-static void free_result(void *result)
+static void
+free_result(void *result)
 {
   cass_result_free((CassResult *) result);
 }
 
-static void free_statement(void *statement)
+static void
+free_statement(void *statement)
 {
   cass_statement_free((CassStatement *) statement);
 }
 
-static void free_schema(void *schema)
+static void
+free_schema(void *schema)
 {
   cass_schema_meta_free((CassSchemaMeta *) schema);
+}
+
+static cassandra_custom_marshal *
+get_custom_marshal(zval *custom TSRMLS_DC) {
+  cassandra_custom_marshal *marshal = NULL;
+  php5to7_zval retval;
+
+  PHP5TO7_ZVAL_UNDEF(retval);
+
+  zend_call_method_with_0_params(PHP5TO7_ZVAL_MAYBE_ADDR_OF(custom),
+                                 Z_OBJCE_P(custom),
+                                 NULL,
+                                 "type",
+                                 &retval);
+  do {
+    cassandra_type *type;
+
+    if (PHP5TO7_ZVAL_IS_UNDEF(retval)) {
+      zend_throw_exception_ex(cassandra_runtime_exception_ce, 0 TSRMLS_CC,
+                              "Value's 'type()' method returned undefined");
+      break;
+    }
+
+    type = PHP_CASSANDRA_GET_TYPE(PHP5TO7_ZVAL_MAYBE_P(retval));
+    if (type->type != CASS_VALUE_TYPE_CUSTOM) {
+      zend_throw_exception_ex(cassandra_runtime_exception_ce, 0 TSRMLS_CC,
+                              "Attempting to marshall an unsupported type");
+      break;
+    }
+
+    marshal = php_cassandra_custom_marshal_get(type->name TSRMLS_CC);
+    if (!marshal) {
+      zend_throw_exception_ex(cassandra_runtime_exception_ce, 0 TSRMLS_CC,
+                              "Custom type does not implement marshalling");
+    }
+  } while (0);
+
+
+  PHP5TO7_ZVAL_MAYBE_DESTROY(retval);
+  return marshal;
 }
 
 static int
@@ -233,22 +276,15 @@ bind_argument_by_index(CassStatement *statement, size_t index, zval *value TSRML
     }
 
     if (instanceof_function(Z_OBJCE_P(value), cassandra_custom_ce TSRMLS_CC)) {
-      php5to7_zval retval;
-      cassandra_type *type;
-      cassandra_custom_marshal *marshal;
-      zend_call_method_with_0_params(PHP5TO7_ZVAL_MAYBE_ADDR_OF(value),
-                                     Z_OBJCE_P(value),
-                                     NULL,
-                                     "type",
-                                     &retval);
-      type = PHP_CASSANDRA_GET_TYPE(PHP5TO7_ZVAL_MAYBE_P(retval));
-      if (type->type != CASS_VALUE_TYPE_CUSTOM) {
+      cassandra_custom_marshal *marshal = get_custom_marshal(value TSRMLS_CC);
+      if (!marshal) {
         return FAILURE;
       }
-      marshal = php_cassandra_custom_marshal_get(type->name TSRMLS_CC);
-      if (!marshal ||
-          !marshal->bind_by_index ||
-          marshal->bind_by_index(statement, index, value TSRMLS_CC) == FAILURE) {
+      if (!marshal->bind_by_index) {
+        zend_throw_exception_ex(cassandra_runtime_exception_ce, 0 TSRMLS_CC,
+                                "Custom type does not implement marshalling by index");
+      }
+      if (marshal->bind_by_index(statement, index, value TSRMLS_CC) == FAILURE) {
         return FAILURE;
       }
       return SUCCESS;
@@ -411,22 +447,15 @@ bind_argument_by_name(CassStatement *statement, const char *name,
     }
 
     if (instanceof_function(Z_OBJCE_P(value), cassandra_custom_ce TSRMLS_CC)) {
-      php5to7_zval retval;
-      cassandra_type *type;
-      cassandra_custom_marshal *marshal;
-      zend_call_method_with_0_params(PHP5TO7_ZVAL_MAYBE_ADDR_OF(value),
-                                     Z_OBJCE_P(value),
-                                     NULL,
-                                     "type",
-                                     &retval);
-      type = PHP_CASSANDRA_GET_TYPE(PHP5TO7_ZVAL_MAYBE_P(retval));
-      if (type->type != CASS_VALUE_TYPE_CUSTOM) {
+      cassandra_custom_marshal *marshal = get_custom_marshal(value TSRMLS_CC);
+      if (!marshal) {
         return FAILURE;
       }
-      marshal = php_cassandra_custom_marshal_get(type->name TSRMLS_CC);
-      if (!marshal ||
-          !marshal->bind_by_name ||
-          marshal->bind_by_name(statement, name, value TSRMLS_CC) == FAILURE) {
+      if (!marshal->bind_by_name) {
+        zend_throw_exception_ex(cassandra_runtime_exception_ce, 0 TSRMLS_CC,
+                                "Custom type does not implement marshalling by name");
+      }
+      if (marshal->bind_by_name(statement, name, value TSRMLS_CC) == FAILURE) {
         return FAILURE;
       }
       return SUCCESS;

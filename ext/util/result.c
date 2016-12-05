@@ -72,9 +72,13 @@ php_cassandra_value(const CassValue* value, const CassDataType* data_type, php5t
       return FAILURE;
     );
     marshal = php_cassandra_custom_marshal_get_n(v_string, v_string_len TSRMLS_CC);
-    if (!marshal ||
-        !marshal->get_result ||
-        marshal->get_result(value, out TSRMLS_CC) == FAILURE) {
+    if (!marshal || !marshal->get_result) {
+      zend_throw_exception_ex(cassandra_runtime_exception_ce, 0 TSRMLS_CC,
+                              "Custom type does not implement marshalling results");
+      zval_ptr_dtor(out);
+      return FAILURE;
+    }
+    if (marshal->get_result(value, out TSRMLS_CC) == FAILURE) {
       zval_ptr_dtor(out);
       return FAILURE;
     }
