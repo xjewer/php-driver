@@ -104,4 +104,13 @@ void php_cassandra_cluster_builder_with_timestamp_generator(cassandra_cluster_bu
 void php_cassandra_cluster_builder_with_schema_metadata(cassandra_cluster_builder_base *builder,
                                                         INTERNAL_FUNCTION_PARAMETERS);
 
+void php_cassandra_cluster_builder_with_hostname_resolution(cassandra_cluster_builder_base *builder,
+                                                            INTERNAL_FUNCTION_PARAMETERS);
+
+void php_cassandra_cluster_builder_with_randomized_contact_points(cassandra_cluster_builder_base *builder,
+                                                                  INTERNAL_FUNCTION_PARAMETERS);
+
+void php_cassandra_cluster_builder_with_connection_heartbeat_interval(cassandra_cluster_builder_base *builder,
+                                                                      INTERNAL_FUNCTION_PARAMETERS);
+
 #endif /* PHP_CASSANDRA_CLUSTER_BUILDER_H */

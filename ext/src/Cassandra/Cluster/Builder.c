@@ -142,6 +142,9 @@ static zend_function_entry cassandra_cluster_builder_methods[] = {
   PHP_ABSTRACT_ME(ClusterBuilder, withRetryPolicy, arginfo_retry_policy)
   PHP_ABSTRACT_ME(ClusterBuilder, withTimestampGenerator, arginfo_timestamp_gen)
   PHP_ABSTRACT_ME(ClusterBuilder, withSchemaMetadata, arginfo_enabled)
+  PHP_ABSTRACT_ME(ClusterBuilder, withHostnameResolution, arginfo_enabled)
+  PHP_ABSTRACT_ME(ClusterBuilder, withRandomizedContactPoints, arginfo_enabled)
+  PHP_ABSTRACT_ME(ClusterBuilder, withConnectionHeartbeatInterval, arginfo_interval)
   PHP_FE_END
 };
 
@@ -157,7 +160,7 @@ void cassandra_define_ClusterBuilder(TSRMLS_D)
 void php_cassandra_cluster_builder_generate_hash_key(cassandra_cluster_builder_base *builder,
                                                      char **hash_key, int *hash_key_len) {
   *hash_key_len = spprintf(hash_key, 0,
-                           "cassandra:%s:%d:%d:%s:%d:%d:%d:%s:%s:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%s:%s:%s:%s",
+                           "cassandra:%s:%d:%d:%s:%d:%d:%d:%s:%s:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%s:%s:%s:%s",
                            builder->contact_points, builder->port, builder->load_balancing_policy,
                            SAFE_STR(builder->local_dc), builder->used_hosts_per_remote_dc,
                            builder->allow_remote_dcs_for_local_cl, builder->use_token_aware_routing,
@@ -168,6 +171,8 @@ void php_cassandra_cluster_builder_generate_hash_key(cassandra_cluster_builder_b
                            builder->reconnect_interval, builder->enable_latency_aware_routing,
                            builder->enable_tcp_nodelay, builder->enable_tcp_keepalive,
                            builder->tcp_keepalive_delay, builder->enable_schema,
+                           builder->enable_hostname_resolution, builder->enable_randomized_contact_points,
+                           builder->connection_heartbeat_interval,
                            SAFE_STR(builder->whitelist_hosts), SAFE_STR(builder->whitelist_dcs),
                            SAFE_STR(builder->blacklist_hosts), SAFE_STR(builder->blacklist_dcs));
 }
@@ -240,6 +245,9 @@ void php_cassandra_cluster_builder_init(cassandra_cluster_builder_base *builder)
   builder->whitelist_hosts = NULL;
   builder->blacklist_dcs = NULL;
   builder->whitelist_dcs = NULL;
+  builder->enable_hostname_resolution = 0;
+  builder->enable_randomized_contact_points = 1;
+  builder->connection_heartbeat_interval = 30;
 
   PHP5TO7_ZVAL_UNDEF(builder->ssl_options);
   PHP5TO7_ZVAL_UNDEF(builder->default_timeout);
@@ -325,6 +333,9 @@ void php_cassandra_cluster_builder_properties(cassandra_cluster_builder_base *bu
   php5to7_zval whitelistDCs;
   php5to7_zval timestampGen;
   php5to7_zval schemaMetadata;
+  php5to7_zval hostnameResolution;
+  php5to7_zval randomizedContactPoints;
+  php5to7_zval connectionHeartbeatInterval;
 
   PHP5TO7_ZVAL_MAYBE_MAKE(contactPoints);
   PHP5TO7_ZVAL_STRING(PHP5TO7_ZVAL_MAYBE_P(contactPoints), builder->contact_points);
@@ -457,6 +468,15 @@ void php_cassandra_cluster_builder_properties(cassandra_cluster_builder_base *bu
   PHP5TO7_ZVAL_MAYBE_MAKE(schemaMetadata);
   ZVAL_BOOL(PHP5TO7_ZVAL_MAYBE_P(schemaMetadata), builder->enable_schema);
 
+  PHP5TO7_ZVAL_MAYBE_MAKE(hostnameResolution);
+  ZVAL_BOOL(PHP5TO7_ZVAL_MAYBE_P(hostnameResolution), builder->enable_hostname_resolution);
+
+  PHP5TO7_ZVAL_MAYBE_MAKE(randomizedContactPoints);
+  ZVAL_BOOL(PHP5TO7_ZVAL_MAYBE_P(randomizedContactPoints), builder->enable_randomized_contact_points);
+
+  PHP5TO7_ZVAL_MAYBE_MAKE(connectionHeartbeatInterval);
+  ZVAL_LONG(PHP5TO7_ZVAL_MAYBE_P(connectionHeartbeatInterval), builder->connection_heartbeat_interval);
+
   PHP5TO7_ZEND_HASH_UPDATE(props, "contactPoints", sizeof("contactPoints"),
                            PHP5TO7_ZVAL_MAYBE_P(contactPoints), sizeof(zval));
   PHP5TO7_ZEND_HASH_UPDATE(props, "loadBalancingPolicy", sizeof("loadBalancingPolicy"),
@@ -517,6 +537,12 @@ void php_cassandra_cluster_builder_properties(cassandra_cluster_builder_base *bu
                            PHP5TO7_ZVAL_MAYBE_P(blacklistDCs), sizeof(zval));
   PHP5TO7_ZEND_HASH_UPDATE(props, "whitelist_dcs", sizeof("whitelist_dcs"),
                            PHP5TO7_ZVAL_MAYBE_P(whitelistDCs), sizeof(zval));
+  PHP5TO7_ZEND_HASH_UPDATE(props, "hostnameResolution", sizeof("hostnameResolution"),
+                           PHP5TO7_ZVAL_MAYBE_P(hostnameResolution), sizeof(zval));
+  PHP5TO7_ZEND_HASH_UPDATE(props, "randomizedContactPoints", sizeof("randomizedContactPoints"),
+                           PHP5TO7_ZVAL_MAYBE_P(randomizedContactPoints), sizeof(zval));
+  PHP5TO7_ZEND_HASH_UPDATE(props, "connectionHeartbeatInterval", sizeof("connectionHeartbeatInterval"),
+                           PHP5TO7_ZVAL_MAYBE_P(connectionHeartbeatInterval), sizeof(zval));
 }
 
 void php_cassandra_cluster_builder_build(cassandra_cluster_builder_base *builder,
@@ -572,6 +598,9 @@ void php_cassandra_cluster_builder_build(cassandra_cluster_builder_base *builder
   cass_cluster_set_tcp_nodelay(cluster, builder->enable_tcp_nodelay);
   cass_cluster_set_tcp_keepalive(cluster, builder->enable_tcp_keepalive, builder->tcp_keepalive_delay);
   cass_cluster_set_use_schema(cluster, builder->enable_schema);
+  ASSERT_SUCCESS(cass_cluster_set_use_hostname_resolution(cluster, builder->enable_hostname_resolution));
+  ASSERT_SUCCESS(cass_cluster_set_use_randomized_contact_points(cluster, builder->enable_randomized_contact_points));
+  cass_cluster_set_connection_heartbeat_interval(cluster, builder->connection_heartbeat_interval);
 
   if (!PHP5TO7_ZVAL_IS_UNDEF(builder->timestamp_gen)) {
     cassandra_timestamp_gen *timestamp_gen =
@@ -1240,4 +1269,52 @@ void php_cassandra_cluster_builder_with_schema_metadata(cassandra_cluster_builde
   RETURN_ZVAL(getThis(), 1, 0);
 }
 
+void php_cassandra_cluster_builder_with_hostname_resolution(cassandra_cluster_builder_base *builder,
+                                                            INTERNAL_FUNCTION_PARAMETERS)
+{
+  zend_bool enabled = 1;
 
+  if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|b", &enabled) == FAILURE) {
+    return;
+  }
+
+  builder->enable_hostname_resolution = enabled;
+
+  RETURN_ZVAL(getThis(), 1, 0);
+}
+
+void php_cassandra_cluster_builder_with_randomized_contact_points(cassandra_cluster_builder_base *builder,
+                                                                  INTERNAL_FUNCTION_PARAMETERS)
+{
+  zend_bool enabled = 1;
+
+  if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|b", &enabled) == FAILURE) {
+    return;
+  }
+
+  builder->enable_randomized_contact_points = enabled;
+
+  RETURN_ZVAL(getThis(), 1, 0);
+}
+
+void php_cassandra_cluster_builder_with_connection_heartbeat_interval(cassandra_cluster_builder_base *builder,
+                                                                      INTERNAL_FUNCTION_PARAMETERS)
+{
+  zval *interval = NULL;
+
+  if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &interval) == FAILURE) {
+    return;
+  }
+
+  if (Z_TYPE_P(interval) == IS_LONG &&
+      Z_LVAL_P(interval) >= 0) {
+    builder->connection_heartbeat_interval = Z_LVAL_P(interval);
+  } else if (Z_TYPE_P(interval) == IS_DOUBLE &&
+             Z_DVAL_P(interval) >= 0) {
+    builder->connection_heartbeat_interval = ceil(Z_DVAL_P(interval));
+  } else {
+    INVALID_ARGUMENT(interval, "a positive number (or 0 to disable)");
+  }
+
+  RETURN_ZVAL(getThis(), 1, 0);
+}

@@ -322,6 +322,9 @@ typedef struct {
   char *whitelist_hosts;
   char *blacklist_dcs;
   char *whitelist_dcs;
+  cass_bool_t enable_hostname_resolution;
+  cass_bool_t enable_randomized_contact_points;
+  unsigned int connection_heartbeat_interval;
 } cassandra_cluster_builder_base;
 
 PHP_CASSANDRA_BEGIN_OBJECT_TYPE(cluster_builder)

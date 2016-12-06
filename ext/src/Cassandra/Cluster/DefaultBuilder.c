@@ -257,6 +257,27 @@ PHP_METHOD(ClusterBuilder, withSchemaMetadata)
                                                      INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
+PHP_METHOD(ClusterBuilder, withHostnameResolution)
+{
+  cassandra_cluster_builder *self = PHP_CASSANDRA_GET_CLUSTER_BUILDER(getThis());
+  php_cassandra_cluster_builder_with_hostname_resolution(&self->base,
+                                                         INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+PHP_METHOD(ClusterBuilder, withRandomizedContactPoints)
+{
+  cassandra_cluster_builder *self = PHP_CASSANDRA_GET_CLUSTER_BUILDER(getThis());
+  php_cassandra_cluster_builder_with_randomized_contact_points(&self->base,
+                                                               INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+PHP_METHOD(ClusterBuilder, withConnectionHeartbeatInterval)
+{
+  cassandra_cluster_builder *self = PHP_CASSANDRA_GET_CLUSTER_BUILDER(getThis());
+  php_cassandra_cluster_builder_with_connection_heartbeat_interval(&self->base,
+                                                                   INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_none, 0, ZEND_RETURN_VALUE, 0)
 ZEND_END_ARG_INFO()
 
@@ -373,6 +394,9 @@ static zend_function_entry cassandra_default_cluster_builder_methods[] = {
   PHP_ME(ClusterBuilder, withRetryPolicy, arginfo_retry_policy, ZEND_ACC_PUBLIC)
   PHP_ME(ClusterBuilder, withTimestampGenerator, arginfo_timestamp_gen, ZEND_ACC_PUBLIC)
   PHP_ME(ClusterBuilder, withSchemaMetadata, arginfo_enabled, ZEND_ACC_PUBLIC)
+  PHP_ME(ClusterBuilder, withHostnameResolution, arginfo_enabled, ZEND_ACC_PUBLIC)
+  PHP_ME(ClusterBuilder, withRandomizedContactPoints, arginfo_enabled, ZEND_ACC_PUBLIC)
+  PHP_ME(ClusterBuilder, withConnectionHeartbeatInterval, arginfo_interval, ZEND_ACC_PUBLIC)
   PHP_FE_END
 };
 
