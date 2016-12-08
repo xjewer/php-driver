@@ -4,7 +4,7 @@
 #include "php_cassandra_types.h"
 
 void php_cassandra_cluster_builder_generate_hash_key(cassandra_cluster_builder_base *builder,
-                                                     char **hash_key, int *hash_key_len);
+                                                     smart_str *hash_key);
 
 CassCluster *php_cassandra_cluster_builder_get_cache(cassandra_cluster_builder_base *builder,
                                                      const char *hash_key, int hash_key_len TSRMLS_DC);

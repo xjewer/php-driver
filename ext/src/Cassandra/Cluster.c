@@ -15,6 +15,7 @@
  */
 
 #include "php_cassandra.h"
+#include "php_cassandra_types.h"
 #include "php_cassandra_globals.h"
 #include "util/future.h"
 #include "util/ref.h"
@@ -52,7 +53,7 @@ void php_cassandra_cluster_init(cassandra_cluster_base *cluster)
   cluster->default_consistency = PHP_CASSANDRA_DEFAULT_CONSISTENCY;
   cluster->default_page_size   = 5000;
   cluster->persist             = 0;
-  cluster->hash_key            = NULL;
+  cluster->hash_key            = (smart_str) PHP5TO7_SMART_STR_INIT;
 
   PHP5TO7_ZVAL_UNDEF(cluster->default_timeout);
 }
@@ -61,7 +62,7 @@ void php_cassandra_cluster_init(cassandra_cluster_base *cluster)
 void php_cassandra_cluster_destroy(cassandra_cluster_base *cluster)
 {
   if (cluster->persist) {
-    efree(cluster->hash_key);
+    smart_str_free(&cluster->hash_key);
   } else {
     if (cluster->cluster) {
       cass_cluster_free(cluster->cluster);
@@ -94,7 +95,7 @@ void php_cassandra_cluster_connect(cassandra_cluster_base *cluster,
     php5to7_zend_resource_le *le;
 
     hash_key_len = spprintf(&hash_key, 0, "%s:session:%s",
-                            cluster->hash_key, SAFE_STR(keyspace));
+                            PHP5TO7_SMART_STR_VAL(cluster->hash_key), SAFE_STR(keyspace));
 
     if (PHP5TO7_ZEND_HASH_FIND(&EG(persistent_list), hash_key, hash_key_len + 1, le) &&
         Z_RES_P(le)->type == php_le_cassandra_session()) {
@@ -179,19 +180,18 @@ void php_cassandra_cluster_connect_async(cassandra_cluster_base *cluster,
   if (cluster->persist) {
     php5to7_zend_resource_le *le;
 
-    hash_key_len = spprintf(&hash_key, 0,
-      "%s:session:%s", cluster->hash_key, SAFE_STR(keyspace));
+    hash_key_len = spprintf(&hash_key, 0, "%s:session:%s",
+                            PHP5TO7_SMART_STR_VAL(cluster->hash_key), SAFE_STR(keyspace));
 
     future->hash_key     = hash_key;
     future->hash_key_len = hash_key_len;
 
-    if (PHP5TO7_ZEND_HASH_FIND(&EG(persistent_list), hash_key, hash_key_len + 1, le)) {
-      if (Z_TYPE_P(le) == php_le_cassandra_session()) {
-        cassandra_psession *psession = (cassandra_psession *) Z_RES_P(le)->ptr;
-        future->session = php_cassandra_add_ref(psession->session);
-        future->future  = psession->future;
-        return;
-      }
+    if (PHP5TO7_ZEND_HASH_FIND(&EG(persistent_list), hash_key, hash_key_len + 1, le) &&
+        Z_RES_P(le)->type == php_le_cassandra_session()) {
+      cassandra_psession *psession = (cassandra_psession *) Z_RES_P(le)->ptr;
+      future->session = php_cassandra_add_ref(psession->session);
+      future->future  = psession->future;
+      return;
     }
   }
 

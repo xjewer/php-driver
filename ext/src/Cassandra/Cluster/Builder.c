@@ -18,12 +18,6 @@
 #include "php_cassandra_globals.h"
 #include "util/consistency.h"
 
-#if PHP_MAJOR_VERSION >= 7
-#include <zend_smart_str.h>
-#else
-#include <ext/standard/php_smart_str.h>
-#endif
-
 zend_class_entry *cassandra_cluster_builder_ce = NULL;
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_none, 0, ZEND_RETURN_VALUE, 0)
@@ -158,23 +152,90 @@ void cassandra_define_ClusterBuilder(TSRMLS_D)
 }
 
 void php_cassandra_cluster_builder_generate_hash_key(cassandra_cluster_builder_base *builder,
-                                                     char **hash_key, int *hash_key_len) {
-  *hash_key_len = spprintf(hash_key, 0,
-                           "cassandra:%s:%d:%d:%s:%d:%d:%d:%s:%s:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%s:%s:%s:%s",
-                           builder->contact_points, builder->port, builder->load_balancing_policy,
-                           SAFE_STR(builder->local_dc), builder->used_hosts_per_remote_dc,
-                           builder->allow_remote_dcs_for_local_cl, builder->use_token_aware_routing,
-                           SAFE_STR(builder->username), SAFE_STR(builder->password),
-                           builder->connect_timeout, builder->request_timeout,
-                           builder->protocol_version, builder->io_threads,
-                           builder->core_connections_per_host, builder->max_connections_per_host,
-                           builder->reconnect_interval, builder->enable_latency_aware_routing,
-                           builder->enable_tcp_nodelay, builder->enable_tcp_keepalive,
-                           builder->tcp_keepalive_delay, builder->enable_schema,
-                           builder->enable_hostname_resolution, builder->enable_randomized_contact_points,
-                           builder->connection_heartbeat_interval,
-                           SAFE_STR(builder->whitelist_hosts), SAFE_STR(builder->whitelist_dcs),
-                           SAFE_STR(builder->blacklist_hosts), SAFE_STR(builder->blacklist_dcs));
+                                                     smart_str *hash_key) {
+  smart_str_appendc(hash_key, ':');
+  smart_str_appends(hash_key, builder->contact_points);
+
+  smart_str_appendc(hash_key, ':');
+  smart_str_append_long(hash_key, builder->port);
+
+  smart_str_appendc(hash_key, ':');
+  smart_str_append_long(hash_key, builder->load_balancing_policy);
+
+  smart_str_appendc(hash_key, ':');
+  smart_str_appends(hash_key, SAFE_STR(builder->local_dc));
+
+  smart_str_appendc(hash_key, ':');
+  smart_str_append_long(hash_key, builder->allow_remote_dcs_for_local_cl);
+
+  smart_str_appendc(hash_key, ':');
+  smart_str_append_long(hash_key, builder->used_hosts_per_remote_dc);
+
+  smart_str_appendc(hash_key, ':');
+  smart_str_append_long(hash_key, builder->use_token_aware_routing);
+
+  smart_str_appendc(hash_key, ':');
+  smart_str_appends(hash_key, SAFE_STR(builder->username));
+
+  smart_str_appendc(hash_key, ':');
+  smart_str_appends(hash_key, SAFE_STR(builder->password));
+
+  smart_str_appendc(hash_key, ':');
+  smart_str_append_long(hash_key, builder->connect_timeout);
+
+  smart_str_appendc(hash_key, ':');
+  smart_str_append_long(hash_key, builder->request_timeout);
+
+  smart_str_appendc(hash_key, ':');
+  smart_str_append_long(hash_key, builder->protocol_version);
+
+  smart_str_appendc(hash_key, ':');
+  smart_str_append_long(hash_key, builder->io_threads);
+
+  smart_str_appendc(hash_key, ':');
+  smart_str_append_long(hash_key, builder->core_connections_per_host);
+
+  smart_str_appendc(hash_key, ':');
+  smart_str_append_long(hash_key, builder->max_connections_per_host);
+
+  smart_str_appendc(hash_key, ':');
+  smart_str_append_long(hash_key, builder->reconnect_interval);
+
+  smart_str_appendc(hash_key, ':');
+  smart_str_append_long(hash_key, builder->enable_latency_aware_routing);
+
+  smart_str_appendc(hash_key, ':');
+  smart_str_append_long(hash_key, builder->enable_tcp_nodelay);
+
+  smart_str_appendc(hash_key, ':');
+  smart_str_append_long(hash_key, builder->enable_tcp_keepalive);
+
+  smart_str_appendc(hash_key, ':');
+  smart_str_append_long(hash_key, builder->tcp_keepalive_delay);
+
+  smart_str_appendc(hash_key, ':');
+  smart_str_append_long(hash_key, builder->enable_schema);
+
+  smart_str_appendc(hash_key, ':');
+  smart_str_append_long(hash_key, builder->enable_hostname_resolution);
+
+  smart_str_appendc(hash_key, ':');
+  smart_str_append_long(hash_key, builder->enable_randomized_contact_points);
+
+  smart_str_appendc(hash_key, ':');
+  smart_str_append_long(hash_key, builder->connection_heartbeat_interval);
+
+  smart_str_appendc(hash_key, ':');
+  smart_str_appends(hash_key, SAFE_STR(builder->whitelist_hosts));
+
+  smart_str_appendc(hash_key, ':');
+  smart_str_appends(hash_key, SAFE_STR(builder->whitelist_dcs));
+
+  smart_str_appendc(hash_key, ':');
+  smart_str_appends(hash_key, SAFE_STR(builder->blacklist_hosts));
+
+  smart_str_appendc(hash_key, ':');
+  smart_str_appends(hash_key, SAFE_STR(builder->blacklist_dcs));
 }
 
 CassCluster *php_cassandra_cluster_builder_get_cache(cassandra_cluster_builder_base *builder,

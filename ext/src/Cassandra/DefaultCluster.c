@@ -71,6 +71,8 @@ PHP_METHOD(DefaultCluster, connectAsync)
   future = &PHP_CASSANDRA_GET_FUTURE_SESSION(return_value)->base;
 
   future->persist = cluster->persist;
+  future->hash_key = estrdup(PHP5TO7_SMART_STR_VAL(cluster->hash_key));
+  future->hash_key_len = PHP5TO7_SMART_STR_LEN(cluster->hash_key);
 
   php_cassandra_cluster_connect_async(cluster,
                                       keyspace, keyspace_len,
@@ -130,6 +132,7 @@ php_cassandra_default_cluster_new(zend_class_entry *ce TSRMLS_DC)
       PHP5TO7_ZEND_OBJECT_ECALLOC(cassandra_cluster, ce);
 
   php_cassandra_cluster_init(&self->base);
+  smart_str_appends(&self->base.hash_key, "cassandra");
 
   PHP5TO7_ZEND_OBJECT_INIT_EX(cassandra_cluster, cassandra_default_cluster, self, ce);
 }

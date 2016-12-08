@@ -80,7 +80,7 @@ php_cassandra_future_session_free(php5to7_zend_object_free *object TSRMLS_DC)
   cassandra_future_session *self =
       PHP5TO7_ZEND_OBJECT_GET(cassandra_future_session, object);
 
-  php_cassandra_future_session_init(&self->base);
+  php_cassandra_future_session_destroy(&self->base);
 
   zend_object_std_dtor(&self->zval TSRMLS_CC);
   PHP5TO7_MAYBE_EFREE(self);
@@ -92,7 +92,7 @@ php_cassandra_future_session_new(zend_class_entry *ce TSRMLS_DC)
   cassandra_future_session *self
       = PHP5TO7_ZEND_OBJECT_ECALLOC(cassandra_future_session, ce);
 
-  php_cassandra_future_session_destroy(&self->base);
+  php_cassandra_future_session_init(&self->base);
 
   PHP5TO7_ZEND_OBJECT_INIT(cassandra_future_session, self, ce);
 }

@@ -18,6 +18,12 @@
 #define PHP_CASSANDRA_TYPES_H
 
 #if PHP_MAJOR_VERSION >= 7
+#include <zend_smart_str.h>
+#else
+#include <ext/standard/php_smart_str.h>
+#endif
+
+#if PHP_MAJOR_VERSION >= 7
 #define PHP_CASSANDRA_BEGIN_OBJECT_TYPE(type_name) \
   typedef struct cassandra_##type_name##_ {
 
@@ -214,8 +220,7 @@ typedef struct {
   int default_page_size;
   php5to7_zval default_timeout;
   cass_bool_t persist;
-  char *hash_key;
-  int hash_key_len;
+  smart_str hash_key;
 } cassandra_cluster_base;
 
 PHP_CASSANDRA_BEGIN_OBJECT_TYPE(cluster)

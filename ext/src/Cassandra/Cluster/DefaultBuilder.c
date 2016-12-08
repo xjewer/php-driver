@@ -15,6 +15,7 @@
  */
 
 #include "php_cassandra.h"
+#include "php_cassandra_types.h"
 #include "util/consistency.h"
 
 #include "Builder.h"
@@ -45,12 +46,12 @@ PHP_METHOD(ClusterBuilder, build)
 
   if (builder->persist) {
     php_cassandra_cluster_builder_generate_hash_key(builder,
-                                                    &cluster->hash_key,
-                                                    &cluster->hash_key_len);
+                                                    &cluster->hash_key);
+    smart_str_0(&cluster->hash_key);
 
     cluster->cluster = php_cassandra_cluster_builder_get_cache(builder,
-                                                               cluster->hash_key,
-                                                               cluster->hash_key_len TSRMLS_CC);
+                                                               PHP5TO7_SMART_STR_VAL(cluster->hash_key),
+                                                               PHP5TO7_SMART_STR_LEN(cluster->hash_key) TSRMLS_CC);
     if (cluster->cluster) {
       return;
     }
@@ -61,8 +62,8 @@ PHP_METHOD(ClusterBuilder, build)
 
   if (builder->persist) {
     php_cassandra_cluster_builder_add_cache(builder,
-                                            cluster->hash_key,
-                                            cluster->hash_key_len,
+                                            PHP5TO7_SMART_STR_VAL(cluster->hash_key),
+                                            PHP5TO7_SMART_STR_LEN(cluster->hash_key),
                                             cluster->cluster TSRMLS_CC);
   }
 }
